@@ -1,0 +1,102 @@
+{
+  "sound_map": [
+    {
+      "category_name": "정서적 안정 및 자기 인식",
+      "musical_note": "Do",
+      "international_note": "C",
+      "charms": [
+        {"charm_name": "침착함", "keywords": ["Low Flute", "Calm", "Breathing"]},
+        {"charm_name": "안정감", "keywords": ["Cello (long notes)", "Stable", "Sustained"]},
+        {"charm_name": "자기성찰", "keywords": ["Ambient Synth Pad", "Introspective", "Spacious"]},
+        {"charm_name": "긍정성", "keywords": ["Acoustic Guitar (Arpeggio)", "Hopeful", "Peaceful"]},
+        {"charm_name": "현실감각", "keywords": ["Upright Bass (arco)", "Grounded", "Foundation"]},
+        {"charm_name": "자기객관화", "keywords": ["Muted Piano", "Clear", "Muted", "Reflective"]},
+        {"charm_name": "자존감", "keywords": ["Warm Pad", "Self-love", "Enveloping"]},
+        {"charm_name": "겸손", "keywords": ["Muted Trumpet", "Humble", "Not too loud"]}
+      ]
+    },
+    {
+      "category_name": "성실성 및 책임감",
+      "musical_note": "Re",
+      "international_note": "D",
+      "charms": [
+        {"charm_name": "성실함", "keywords": ["Harpsichord", "Structured", "Precise"]},
+        {"charm_name": "책임감", "keywords": ["Double Bass (pizzicato)", "Supportive", "Backbone"]},
+        {"charm_name": "인내심", "keywords": ["Bassoon", "Patient", "Enduring"]},
+        {"charm_name": "계획성", "keywords": ["Music Box", "Intricate", "Clockwork", "Planning"]},
+        {"charm_name": "세심함", "keywords": ["Delicate Bells", "Detailed", "Careful", "Sparkling"]},
+        {"charm_name": "신중함", "keywords": ["Clarinet (low register)", "Prudent", "Considered"]},
+        {"charm_name": "절제력", "keywords": ["Minimalist Synth", "Controlled", "Restrained"]}
+      ]
+    },
+    {
+      "category_name": "도덕성 및 양심",
+      "musical_note": "Mi",
+      "international_note": "E",
+      "charms": [
+        {"charm_name": "정직함", "keywords": ["Glockenspiel", "Honest", "Clear", "Bright"]},
+        {"charm_name": "양심", "keywords": ["Boy's Choir", "Pure", "Conscience", "Innocent"]},
+        {"charm_name": "일관성", "keywords": ["Pipe Organ", "Consistent", "Noble", "Principled"]},
+        {"charm_name": "원칙준수", "keywords": ["Harp", "Principled", "Orderly", "Elegant"]},
+        {"charm_name": "진정성", "keywords": ["Sine Wave Synth", "Authentic", "Pure Tone"]},
+        {"charm_name": "약자보호", "keywords": ["French Horn", "Protective", "Brave", "Knightly"]}
+      ]
+    },
+    {
+      "category_name": "지적 호기심 및 개방성",
+      "musical_note": "Fa",
+      "international_note": "F",
+      "charms": [
+        {"charm_name": "호기심", "keywords": ["Theremin", "Questioning", "Ethereal", "Exploring"]},
+        {"charm_name": "창의성", "keywords": ["Synth Arpeggiator", "Creative", "Pattern", "Flowing"]},
+        {"charm_name": "열린마음", "keywords": ["Ambient Textures", "Open", "Spacious", "Accepting"]},
+        {"charm_name": "모험심", "keywords": ["Kalimba", "Adventurous", "Curious", "Exotic"]},
+        {"charm_name": "비판적사고력", "keywords": ["Glitch SFX", "Unconventional", "Deconstructed"]},
+        {"charm_name": "통찰력", "keywords": ["Electric Piano (Wurlitzer)", "Insightful", "Jazzy"]},
+        {"charm_name": "넓은시야", "keywords": ["String Pad", "Panoramic", "Broad", "Sweeping"]},
+        {"charm_name": "집중력", "keywords": ["Sampler (Vocal Chop)", "Focus", "Rhythmic", "Detail"]}
+      ]
+    },
+    {
+      "category_name": "이해심 및 공감 능력",
+      "musical_note": "Sol",
+      "international_note": "G",
+      "charms": [
+        {"charm_name": "다정함", "keywords": ["Nylon String Guitar", "Gentle", "Affectionate"]},
+        {"charm_name": "공감능력", "keywords": ["Viola", "Warm Vibrato", "Resonant"]},
+        {"charm_name": "이해심", "keywords": ["Oboe", "Melancholy but Sweet", "Understanding"]},
+        {"charm_name": "배려심", "keywords": ["Choir 'Oohs' Pad", "Caring", "Enveloping"]},
+        {"charm_name": "경청능력", "keywords": ["Handpan", "Listening", "Harmonious", "Open"]},
+        {"charm_name": "위로능력", "keywords": ["Electric Piano (Rhodes)", "Comforting", "Cozy"]},
+        {"charm_name": "섬세함", "keywords": ["Celesta", "Delicate", "Twinkling", "Considerate"]}
+      ]
+    },
+    {
+      "category_name": "유머감각 및 사교성",
+      "musical_note": "La",
+      "international_note": "A",
+      "charms": [
+        {"charm_name": "유머감각", "keywords": ["Pizzicato Strings", "Witty", "Bouncy", "Playful"]},
+        {"charm_name": "분위기메이커", "keywords": ["Light Shaker & Bongo", "Groove", "Atmosphere"]},
+        {"charm_name": "다양한친분", "keywords": ["Marimba", "Conversational", "Social", "Wooden"]},
+        {"charm_name": "타인을편하게해주는능력", "keywords": ["Ukulele Strum", "Welcoming", "Friendly"]},
+        {"charm_name": "관계를이어가는능력", "keywords": ["Mandolin Tremolo", "Connecting", "Shimmering"]},
+        {"charm_name": "사교적에너지", "keywords": ["Clean Electric Guitar (Funk)", "Energetic", "Upbeat"]}
+      ]
+    },
+    {
+      "category_name": "목표 지향성 및 야망",
+      "musical_note": "Si",
+      "international_note": "B",
+      "charms": [
+        {"charm_name": "목표의식", "keywords": ["Staccato Strings", "Focused", "Driving", "Cinematic"]},
+        {"charm_name": "열정", "keywords": ["Overdriven E-Guitar", "Passionate", "Gritty", "Raw"]},
+        {"charm_name": "자기계발의지", "keywords": ["Synth Lead", "Developing", "Upward", "Progressive"]},
+        {"charm_name": "리더십", "keywords": ["Trumpet Fanfare", "Leadership", "Bold", "Commanding"]},
+        {"charm_name": "야망", "keywords": ["Orchestral Hit", "Ambitious", "Epic", "Dramatic"]},
+        {"charm_name": "경쟁심", "keywords": ["Snare Drum (Marching)", "Competitive", "Tension"]},
+        {"charm_name": "전략적사고", "keywords": ["Timpani", "Strategic", "Decisive", "Impact"]}
+      ]
+    }
+  ]
+}

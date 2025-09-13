@@ -1,0 +1,19 @@
+{
+  "name": "aster-alarm-gemini-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "@google-cloud/vertexai": "^1.7.0",
+    "axios": "^1.11.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^4.19.2",
+    "form-data": "^4.0.4"
+  }
+}
