@@ -21,12 +21,170 @@ const MODEL = process.env.GEMINI_MODEL || 'gemini-1.5-pro';
 const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
 const STABLE_AUDIO_API_URL = 'https://api.stability.ai/v2beta/audio/stable-audio-2/text-to-audio';
 
+// Gemini API Key for optimization (centrally managed)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-// Load DB (copy kept under server/data). Keep in sync with web/data.
+// IP usage tracking
+const ipUsage = new Map(); // { ip: { count: number, lastReset: Date } }
+const MAX_USES_PER_IP = 2;
+const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
+         req.headers['x-real-ip'] || 
+         req.connection?.remoteAddress || 
+         req.socket?.remoteAddress ||
+         req.ip ||
+         'unknown';
+}
+
+function checkIPLimit(ip) {
+  const now = new Date();
+  const usage = ipUsage.get(ip);
+  
+  if (!usage) {
+    ipUsage.set(ip, { count: 0, lastReset: now });
+    return { allowed: true, remaining: MAX_USES_PER_IP };
+  }
+  
+  // Reset if 24 hours have passed
+  if (now - usage.lastReset > RESET_INTERVAL) {
+    usage.count = 0;
+    usage.lastReset = now;
+  }
+  
+  const remaining = MAX_USES_PER_IP - usage.count;
+  return { allowed: remaining > 0, remaining };
+}
+
+function incrementIPUsage(ip) {
+  const usage = ipUsage.get(ip);
+  if (usage) {
+    usage.count++;
+  }
+}
+
+// Gemini API optimization function
+async function optimizePromptViaGemini(spec, prompt) {
+  if (!GEMINI_API_KEY) {
+    console.warn('GEMINI_API_KEY not set, skipping optimization');
+    return prompt;
+  }
+
+  try {
+    const systemPrompt = `당신은 한국어 음악 프롬프트 에디터입니다. 
+아래 스펙과 초안 프롬프트를 참고하여, 음악 생성 모델에 적합하도록 한국어 프롬프트를 다듬고 더 자연스럽게 개선하세요. 
+의미(길이, 템포, 역할, 핵심 음 등)는 유지하고, 불필요한 중복을 제거하세요. 
+반환은 한국어 최종 프롬프트 텍스트만, 코드블록/JSON 없이 한글 문장으로만 출력하세요.`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+    const body = {
+      system_instruction: { role: 'system', parts: [{ text: systemPrompt }] },
+      contents: [{
+        role: 'user',
+        parts: [
+          { text: 'SPEC:' },
+          { text: JSON.stringify(spec, null, 2) },
+          { text: 'PROMPT_DRAFT:' },
+          { text: prompt }
+        ]
+      }]
+    };
+
+    const res = await axios.post(url, body, {
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 30000
+    });
+
+    const data = res.data;
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const outText = parts.map(p => p.text || '').join('\n');
+    return outText.replace(/```[a-z]*|```/g, '').trim() || prompt;
+  } catch (error) {
+    console.error('Gemini optimization failed:', error.message);
+    return prompt; // Return original prompt if optimization fails
+  }
+}
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_PATH = path.join(__dirname, 'data', 'sound_map.json');
 const SOUND_DB = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+
+// Import composition logic (simplified version of analyze.js)
+function composeLocal(constellation, context = {}) {
+  const { traits = [] } = constellation;
+  const durationSeconds = context.duration_seconds || 60;
+  
+  // Simple composition logic - you can expand this
+  const enrichedTraits = traits.map(trait => {
+    const info = categoryNoteLookup(trait.charm_name);
+    return {
+      ...trait,
+      category: info.category,
+      root: info.root,
+      keywords: info.keywords
+    };
+  });
+  
+  // Sort by stage (higher first)
+  enrichedTraits.sort((a, b) => (b.stage || 1) - (a.stage || 1));
+  
+  const lead = enrichedTraits[0];
+  const supports = enrichedTraits.slice(1, 3);
+  const fx = enrichedTraits.slice(3, 5);
+  const ambience = enrichedTraits.slice(5);
+  
+  // Generate core notes
+  const coreNotes = [lead, ...supports]
+    .map(t => t.root)
+    .filter(Boolean)
+    .filter((note, idx, arr) => arr.indexOf(note) === idx)
+    .slice(0, 3);
+  
+  // Simple tempo calculation
+  const noteToNumber = { C: 1, D: 2, E: 3, F: 4, G: 5, A: 6, B: 7 };
+  const avgNote = enrichedTraits.reduce((sum, t) => sum + (noteToNumber[t.root] || 4), 0) / enrichedTraits.length;
+  
+  let tempo = { label: 'Moderato', bpm: 95 };
+  if (avgNote <= 2.5) tempo = { label: 'Adagio', bpm: 65 };
+  else if (avgNote >= 4.6) tempo = { label: 'Allegro', bpm: 125 };
+  
+  return {
+    duration_seconds: durationSeconds,
+    roles: {
+      lead: lead ? [lead] : [],
+      support: supports,
+      fx: fx,
+      ambience: ambience
+    },
+    melody: {
+      core_notes: coreNotes,
+      notes_text: coreNotes.join(', '),
+      rhythm_text: '안정적이고 걷는듯한 보통 빠르기의',
+      rhythm_detail: '4분음표 중심의 리듬'
+    },
+    instruments: {
+      lead: '피아노',
+      support: ['현악기', '패드'],
+      fx: ['벨']
+    },
+    genres: ['Ambient', 'Cinematic'],
+    tempo,
+    key: coreNotes[0] || 'C',
+    time_signature: '4/4',
+    keywords: enrichedTraits.flatMap(t => t.keywords).slice(0, 5),
+    avoid: ['너무 강한', '시끄러운', '불안한']
+  };
+}
+
+// Simple template function
+function fillTemplate(spec) {
+  const { melody, instruments, tempo, keywords, duration_seconds } = spec;
+  
+  return `${duration_seconds}초 길이의 벨소리. 메인 멜로디는 ${instruments.lead}로 연주되며, 핵심 음은 ${melody.notes_text}입니다. The core notes of the melody should be ${melody.core_notes.join(', ')}. 리듬은 ${melody.rhythm_text} 특징을 보입니다. 템포는 ${tempo.label} 약 ${tempo.bpm} BPM입니다. 전체적인 분위기는 ${keywords.join(', ')}입니다.`;
+}
 
 const app = express();
 app.use(cors());
@@ -150,15 +308,44 @@ app.post('/compose', async (req, res) => {
   }
 });
 
-// Text-to-music proxy using Stability AI, based on official V2 documentation
+// Unified generation endpoint - handles compose + optimize + generate
 app.post('/generate', async (req, res) => {
     try {
+        const clientIP = getClientIP(req);
+        console.log(`Generation request from IP: ${clientIP}`);
+        
+        // Check IP limit
+        const { allowed, remaining } = checkIPLimit(clientIP);
+        if (!allowed) {
+            return res.status(429).json({ 
+                error: '일일 생성 한도를 초과했습니다. 24시간 후 다시 시도해주세요.',
+                remaining: 0
+            });
+        }
+
+        // Validate required environment variables
         if (!STABILITY_API_KEY || STABILITY_API_KEY === 'YOUR_STABILITY_AI_KEY_HERE') {
             throw new Error('STABILITY_API_KEY env not set or is a placeholder. Please check your .env file.');
         }
 
-        const { spec = {}, prompt = '' } = req.body || {};
+        const { constellation = {}, context = {} } = req.body || {};
+        const { traits = [] } = constellation;
         
+        if (!traits.length) {
+            throw new Error('매력을 최소 1개 이상 선택해주세요.');
+        }
+
+        // Step 1: Compose using local logic (similar to web client)
+        console.log('Step 1: Composing prompt locally...');
+        const spec = composeLocal(constellation, context);
+        let prompt = fillTemplate(spec);
+
+        // Step 2: Optimize using Gemini (server-side)
+        console.log('Step 2: Optimizing prompt with Gemini...');
+        prompt = await optimizePromptViaGemini(spec, prompt);
+
+        // Step 3: Generate music using Stability AI
+        console.log('Step 3: Generating music with Stability AI...');
         const fullPrompt = [
             prompt,
             spec.genres?.length ? `Genres: ${spec.genres.join(', ')}` : '',
@@ -169,9 +356,9 @@ app.post('/generate', async (req, res) => {
 
         const payload = {
             prompt: fullPrompt,
-            duration: spec.duration_seconds || 25, // API expects 'duration', not 'duration_seconds'
+            duration: spec.duration_seconds || context.duration_seconds || 60,
             output_format: 'mp3',
-            model: 'stable-audio-2.5' // Using the latest model as per the docs
+            model: 'stable-audio-2.5'
         };
 
         console.log(`Requesting audio from Stability AI with prompt: ${payload.prompt}`);
@@ -186,22 +373,43 @@ app.post('/generate', async (req, res) => {
                     Authorization: `Bearer ${STABILITY_API_KEY}`,
                     Accept: "audio/*",
                 },
+                timeout: 60000 // 60 seconds timeout
             }
         );
 
         if (response.status === 200) {
+            // Success - increment usage count
+            incrementIPUsage(clientIP);
+            
             const audio_base64 = Buffer.from(response.data, 'binary').toString('base64');
             const mime = response.headers['content-type'] || 'audio/mp3';
-            res.json({ audio_base64, mime });
+            
+            const newRemaining = remaining - 1;
+            console.log(`Generation successful for IP ${clientIP}. Remaining uses: ${newRemaining}`);
+            
+            res.json({ 
+                audio_base64, 
+                mime,
+                spec,
+                prompt,
+                remaining: newRemaining
+            });
         } else {
             throw new Error(`Stability AI returned an error: ${response.status} ${response.data.toString()}`);
         }
 
     } catch (err) {
         const errorMessage = err.response ? err.response.data.toString() : err.message;
-        console.error("Error during Stability AI generation:", errorMessage);
+        console.error("Error during generation:", errorMessage);
         res.status(500).json({ error: errorMessage });
     }
+});
+
+// Get remaining uses for an IP
+app.get('/usage', (req, res) => {
+    const clientIP = getClientIP(req);
+    const { remaining } = checkIPLimit(clientIP);
+    res.json({ remaining, maxUses: MAX_USES_PER_IP });
 });
 
 app.get('/healthz', (req, res) => res.send('ok'));

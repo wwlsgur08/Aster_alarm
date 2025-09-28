@@ -130,16 +130,6 @@
         </div>
         <div class="settings-body">
           <div class="setting-group">
-            <label for="gemini-api-key" class="setting-label">Gemini API 키 (AI Studio)</label>
-            <input id="gemini-api-key" type="password" class="setting-input" placeholder="AIza..." />
-          </div>
-          
-          <div class="setting-group">
-            <label for="gemini-model" class="setting-label">Gemini 모델</label>
-            <input id="gemini-model" class="setting-input" placeholder="gemini-2.5-pro" />
-          </div>
-
-          <div class="setting-group">
             <label for="api-endpoint" class="setting-label">API 엔드포인트</label>
             <input id="api-endpoint" class="setting-input" placeholder="http://localhost:8080/generate" />
           </div>
@@ -148,7 +138,14 @@
             <button id="save-settings" type="button" class="save-settings-btn">설정 저장</button>
           </div>
           
-          <p class="settings-note">음악 생성은 서버 엔드포인트를 사용합니다. 로컬 서버가 켜져 있으면 기본값으로 동작합니다.</p>
+          <div class="settings-info">
+            <p class="settings-note">
+              🎵 <strong>중앙 관리 서비스</strong><br>
+              • API 키는 서버에서 중앙 관리됩니다<br>
+              • 하루에 IP당 최대 2개의 음악을 생성할 수 있습니다<br>
+              • 매일 자정에 사용 횟수가 리셋됩니다
+            </p>
+          </div>
         </div>
       </div>
     </div>

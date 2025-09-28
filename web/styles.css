@@ -649,6 +649,19 @@ body {
   margin: 0;
 }
 
+.settings-info {
+  margin-top: 20px;
+  padding: 16px;
+  background: rgba(147, 112, 219, 0.1);
+  border: 1px solid rgba(147, 112, 219, 0.3);
+  border-radius: 8px;
+}
+
+.settings-info .settings-note {
+  margin: 0;
+  color: var(--text-primary);
+}
+
 /* 매력 선택 모달 */
 .charm-modal-content {
   width: min(800px, 90vw);

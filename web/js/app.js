@@ -288,12 +288,10 @@ async function main() {
   const defaultGenerate = 'http://localhost:8080/generate';
   if (apiEndpoint && !apiEndpoint.value) apiEndpoint.value = defaultGenerate;
 
-  // Settings Modal
+  // Settings Modal (simplified - no need for Gemini API key input)
   const settingsToggle = document.getElementById('settings-toggle');
   const settingsModal = document.getElementById('settings-modal');
   const settingsClose = document.getElementById('settings-close');
-  const geminiKeyInput = document.getElementById('gemini-api-key');
-  const geminiModelInput = document.getElementById('gemini-model');
   const saveSettings = document.getElementById('save-settings');
 
   // Settings modal functions
@@ -313,22 +311,46 @@ async function main() {
     if (e.target === settingsModal) closeSettingsModal();
   });
 
-  // load saved settings
-  try {
-    const savedKey = localStorage.getItem('aster_gemini_api_key') || '';
-    const savedModel = localStorage.getItem('aster_gemini_model') || 'gemini-2.5-pro';
-    if (geminiKeyInput && !geminiKeyInput.value) geminiKeyInput.value = savedKey;
-    if (geminiModelInput && !geminiModelInput.value) geminiModelInput.value = savedModel;
-  } catch {}
-
   saveSettings?.addEventListener('click', () => {
     try {
-      localStorage.setItem('aster_gemini_api_key', geminiKeyInput?.value || '');
-      localStorage.setItem('aster_gemini_model', geminiModelInput?.value || 'gemini-2.5-pro');
       alert('설정이 저장되었습니다.');
       closeSettingsModal();
     } catch {}
   });
+
+  // 사용량 확인 함수
+  async function checkUsage() {
+    try {
+      const generateUrl = (apiEndpoint?.value || '').trim();
+      if (!generateUrl) return { remaining: 0 };
+      
+      const usageUrl = generateUrl.replace('/generate', '/usage');
+      const res = await fetch(usageUrl);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.log('Usage check failed:', e);
+    }
+    return { remaining: 2, maxUses: 2 }; // fallback
+  }
+
+  // 사용량 표시 업데이트
+  async function updateUsageDisplay() {
+    try {
+      const usage = await checkUsage();
+      const usageInfo = `오늘 남은 생성 횟수: ${usage.remaining}/${usage.maxUses || 2}`;
+      if (status.textContent === '' || status.textContent.includes('남은 생성 횟수')) {
+        status.textContent = usageInfo;
+      }
+      generateBtn.disabled = usage.remaining <= 0 || rows.map(r => r.get()).filter(t => t.charm_name).length === 0;
+    } catch (e) {
+      console.log('Usage display update failed:', e);
+    }
+  }
+
+  // 초기 사용량 확인
+  updateUsageDisplay();
 
   // Picker modal
   const picker = document.getElementById('picker');
@@ -382,12 +404,25 @@ async function main() {
       traitsContainer.removeChild(r);
       const idx = rows.findIndex(x => x.row === r);
       if (idx >= 0) rows.splice(idx, 1);
+      updateGenerateDisabled();
+      updateUsageDisplay();
     }, openPicker);
     rows.push({ row, get, set });
     traitsContainer.appendChild(row);
-    if (!pref) openPicker((chosenName) => { try { set({ charm_name: chosenName, stage: '5' }); } catch {} });
+    if (!pref) openPicker((chosenName) => { 
+      try { 
+        set({ charm_name: chosenName, stage: '5' }); 
+        updateGenerateDisabled();
+        updateUsageDisplay();
+      } catch {} 
+    });
   }
-  function clearRows() { rows.splice(0, rows.length); traitsContainer.innerHTML = ''; }
+  function clearRows() { 
+    rows.splice(0, rows.length); 
+    traitsContainer.innerHTML = ''; 
+    updateGenerateDisabled();
+    updateUsageDisplay();
+  }
 
   addBtn.addEventListener('click', () => addRow());
   clearBtn.addEventListener('click', () => clearRows());
@@ -406,22 +441,18 @@ async function main() {
   });
 
   function updateGenerateDisabled() {
-    const key = geminiKeyInput?.value?.trim();
-    const hasKey = Boolean(key);
     const hasGen = Boolean((apiEndpoint?.value || '').trim());
-    generateBtn.disabled = !(hasKey && hasGen);
+    const hasTraits = rows.map(r => r.get()).filter(t => t.charm_name).length > 0;
+    generateBtn.disabled = !(hasGen && hasTraits);
   }
-  geminiKeyInput?.addEventListener('input', updateGenerateDisabled);
+  
   apiEndpoint?.addEventListener('input', updateGenerateDisabled);
   updateGenerateDisabled();
 
-  // Single-click: local compose -> Gemini optimize -> music generate
+  // Simplified generation - server handles everything
   generateBtn.addEventListener('click', async () => {
     try {
-      const key = geminiKeyInput?.value?.trim();
-      const model = geminiModelInput?.value?.trim() || 'gemini-2.5-pro';
       const generateUrl = (apiEndpoint?.value || '').trim();
-      if (!key) throw new Error('Gemini API 키가 필요합니다. 설정에서 입력하세요.');
       if (!generateUrl) throw new Error('음악 생성 엔드포인트가 비었습니다.');
 
       // UI 업데이트: 생성 중 상태
@@ -435,20 +466,19 @@ async function main() {
         duration_seconds: Number(durationSelect.value || 60)
       };
 
-      status.textContent = '로컬 프롬프트 생성 중...';
-      const spec = composeLocal(constellation, context, {}, db);
-      let prompt = fillTemplate(spec);
-      if (specOut) specOut.value = JSON.stringify(spec, null, 2);
-      if (promptOut) promptOut.value = prompt;
-
-      status.textContent = 'Gemini 프롬프트 최적화 중...';
-      const optimized = await optimizePromptViaAiStudio({ key, model, spec, prompt });
-      prompt = optimized || prompt;
-      if (promptOut) promptOut.value = prompt;
-
-      status.textContent = '음악 생성 중...';
-      const genRes = await fetch(generateUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ spec, prompt }) });
-      if (!genRes.ok) throw new Error('음악 생성 프록시 응답 오류');
+      status.textContent = '음악 생성 중... (최대 1분 소요)';
+      
+      const genRes = await fetch(generateUrl, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ constellation, context }) 
+      });
+      
+      if (!genRes.ok) {
+        const errorData = await genRes.json().catch(() => ({}));
+        throw new Error(errorData.error || '음악 생성 프록시 응답 오류');
+      }
+      
       const data = await genRes.json();
       if (!data.audio_base64) throw new Error('오디오가 없습니다.');
 
@@ -459,9 +489,18 @@ async function main() {
       // 플레이어에 음악 로드
       musicPlayer.loadAudio(data.audio_base64, data.mime || 'audio/wav', trackTitle);
       
-      status.textContent = '음악이 준비되었습니다! 🎵 재생해보세요 ✨';
+      const remainingInfo = data.remaining !== undefined ? 
+        ` (오늘 남은 생성 횟수: ${data.remaining})` : '';
+      status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨${remainingInfo}`;
+      
+      // 사용량 업데이트
+      await updateUsageDisplay();
     } catch (e) {
-      status.textContent = '실패: ' + (e.message || e);
+      if (e.message.includes('429') || e.message.includes('한도')) {
+        status.textContent = '일일 생성 한도를 초과했습니다. 24시간 후 다시 시도해주세요.';
+      } else {
+        status.textContent = '실패: ' + (e.message || e);
+      }
     } finally {
       // UI 복원
       generateBtn.classList.remove('generating');
