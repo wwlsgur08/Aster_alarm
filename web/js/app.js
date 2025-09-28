@@ -21,19 +21,59 @@ function el(tag, attrs = {}, children = []) {
 function clampStage(v) {
   const n = Number(v);
   if (!Number.isFinite(n)) return '';
-  return Math.min(6, Math.max(1, Math.round(n)));
+  return Math.min(10, Math.max(1, Math.round(n))); // 1~10 범위로 변경
 }
 
 function buildTraitRow(value = { charm_name: '', stage: '' }, onRemove, openPicker) {
-  const row = el('div', { class: 'trait-row' });
-  const name = el('input', { placeholder: '매력 선택', value: value.charm_name || '', readonly: 'readonly' });
-  const stage = el('input', { type: 'number', placeholder: '단계(1~6)', value: value.stage ?? '', min: '1', max: '6', step: '1' });
-  const pick = el('button', { type: 'button' }, '매력 선택');
-  const del = el('button', { type: 'button' }, '삭제');
-  del.addEventListener('click', () => onRemove(row));
-  pick.addEventListener('click', () => openPicker((chosenName) => { name.value = chosenName; }));
-  row.append(name, stage, pick, del);
-  return { row, get: () => ({ charm_name: name.value.trim(), stage: clampStage(stage.value) }), set: (v) => { name.value = v.charm_name || ''; stage.value = v.stage ?? ''; } };
+  const row = el('div', { class: 'charm-row' });
+  
+  const charmBtn = el('button', { 
+    class: `charm-button ${!value.charm_name ? 'placeholder' : ''}`, 
+    type: 'button' 
+  }, value.charm_name || '매력 선택');
+  
+  const stage = el('input', { 
+    class: `charm-stage ${!value.charm_name ? 'disabled' : ''}`,
+    type: 'number', 
+    placeholder: '1~10', 
+    value: value.stage ?? '', 
+    min: '1', 
+    max: '10', 
+    step: '1' 
+  });
+  
+  const removeBtn = el('button', { 
+    class: 'remove-charm-btn', 
+    type: 'button',
+    title: '삭제'
+  }, '×');
+  
+  charmBtn.addEventListener('click', () => {
+    openPicker((chosenName) => { 
+      charmBtn.textContent = chosenName;
+      charmBtn.classList.remove('placeholder');
+      stage.classList.remove('disabled');
+      if (!stage.value) stage.value = '5'; // 기본값 설정
+    });
+  });
+  
+  removeBtn.addEventListener('click', () => onRemove(row));
+  
+  row.append(charmBtn, stage, removeBtn);
+  
+  return { 
+    row, 
+    get: () => ({ 
+      charm_name: charmBtn.textContent === '매력 선택' ? '' : charmBtn.textContent.trim(), 
+      stage: clampStage(stage.value) 
+    }), 
+    set: (v) => { 
+      charmBtn.textContent = v.charm_name || '매력 선택';
+      charmBtn.classList.toggle('placeholder', !v.charm_name);
+      stage.classList.toggle('disabled', !v.charm_name);
+      stage.value = v.stage ?? ''; 
+    } 
+  };
 }
 
 function download(filename, text) {
@@ -44,7 +84,115 @@ function download(filename, text) {
   setTimeout(() => URL.revokeObjectURL(url), 500);
 }
 
-function copy(text) { navigator.clipboard?.writeText(text); }
+function formatTime(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function initMusicPlayer() {
+  const audio = document.getElementById('audio-player');
+  const playBtn = document.getElementById('play-btn');
+  const downloadBtn = document.getElementById('download-btn');
+  const progressBar = document.getElementById('progress-bar');
+  const progressFill = document.getElementById('progress-fill');
+  const currentTime = document.getElementById('current-time');
+  const totalTime = document.getElementById('total-time');
+  const trackTitle = document.getElementById('track-title');
+  const trackSubtitle = document.getElementById('track-subtitle');
+  const playIcon = playBtn.querySelector('.play-icon');
+  
+  let audioData = null;
+  let fileName = 'aster_alarm.wav';
+  
+  // 오디오 로드
+  function loadAudio(base64Data, mimeType = 'audio/wav', title = '생성된 음악') {
+    audioData = { base64Data, mimeType };
+    fileName = title + '.wav';
+    
+    const audioUrl = `data:${mimeType};base64,${base64Data}`;
+    audio.src = audioUrl;
+    
+    // UI 업데이트
+    trackTitle.textContent = `🎵 ${title}`;
+    trackSubtitle.textContent = '재생 버튼을 눌러 음악을 들어보세요';
+    
+    // 버튼 활성화
+    playBtn.disabled = false;
+    downloadBtn.disabled = false;
+    
+    // 메타데이터 로드 시 시간 업데이트
+    audio.addEventListener('loadedmetadata', () => {
+      totalTime.textContent = formatTime(audio.duration);
+    });
+    
+    audio.load();
+  }
+  
+  // 재생/일시정지 토글
+  function togglePlay() {
+    if (audio.paused) {
+      audio.play();
+      playIcon.textContent = '⏸';
+      playBtn.classList.add('playing');
+    } else {
+      audio.pause();
+      playIcon.textContent = '▶';
+      playBtn.classList.remove('playing');
+    }
+  }
+  
+  // 다운로드
+  function downloadAudio() {
+    if (!audioData) return;
+    
+    const a = document.createElement('a');
+    a.href = `data:${audioData.mimeType};base64,${audioData.base64Data}`;
+    a.download = fileName;
+    a.click();
+  }
+  
+  // 프로그레스 바 클릭으로 위치 이동
+  function seekTo(event) {
+    if (!audio.duration) return;
+    
+    const rect = progressBar.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const percentage = clickX / rect.width;
+    const newTime = percentage * audio.duration;
+    
+    audio.currentTime = newTime;
+  }
+  
+  // 이벤트 리스너
+  playBtn.addEventListener('click', togglePlay);
+  downloadBtn.addEventListener('click', downloadAudio);
+  progressBar.addEventListener('click', seekTo);
+  
+  // 오디오 이벤트
+  audio.addEventListener('timeupdate', () => {
+    if (audio.duration) {
+      const percentage = (audio.currentTime / audio.duration) * 100;
+      progressFill.style.width = `${percentage}%`;
+      currentTime.textContent = formatTime(audio.currentTime);
+    }
+  });
+  
+  audio.addEventListener('ended', () => {
+    playIcon.textContent = '▶';
+    playBtn.classList.remove('playing');
+    progressFill.style.width = '0%';
+    audio.currentTime = 0;
+  });
+  
+  audio.addEventListener('error', () => {
+    trackTitle.textContent = '🎵 오디오 로드 오류';
+    trackSubtitle.textContent = '음악을 재생할 수 없습니다';
+    playBtn.disabled = true;
+  });
+  
+  return { loadAudio };
+}
 
 function systemPromptForOptimize() {
   return (
@@ -107,6 +255,9 @@ async function optimizePromptViaAiStudio({ key, model, spec, prompt }) {
 async function main() {
   const db = await loadDB();
 
+  // 음악 플레이어 초기화
+  const musicPlayer = initMusicPlayer();
+
   const traitsContainer = document.getElementById('traits-container');
   const addBtn = document.getElementById('add-trait');
   const clearBtn = document.getElementById('clear-traits');
@@ -114,32 +265,68 @@ async function main() {
   const loadJsonBtn = document.getElementById('load-json');
   const exportJsonBtn = document.getElementById('export-json');
   const durationSelect = document.getElementById('duration_select');
+  const durationDisplay = document.getElementById('duration-display');
   const apiEndpoint = document.getElementById('api-endpoint');
   const generateBtn = document.getElementById('generate');
   const status = document.getElementById('gen-status');
   const specOut = document.getElementById('spec-output'); // (없어도 무관)
   const promptOut = document.getElementById('prompt-output'); // (없어도 무관)
 
+  // 시간 슬라이더 업데이트 함수
+  function updateDurationDisplay() {
+    const seconds = parseInt(durationSelect.value);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    durationDisplay.textContent = `${minutes}분 ${remainingSeconds.toString().padStart(2, '0')}초`;
+  }
+
+  // 시간 슬라이더 이벤트 리스너
+  durationSelect.addEventListener('input', updateDurationDisplay);
+  updateDurationDisplay(); // 초기 표시
+
   // Defaults
   const defaultGenerate = 'http://localhost:8080/generate';
   if (apiEndpoint && !apiEndpoint.value) apiEndpoint.value = defaultGenerate;
 
-  // Settings
+  // Settings Modal
+  const settingsToggle = document.getElementById('settings-toggle');
+  const settingsModal = document.getElementById('settings-modal');
+  const settingsClose = document.getElementById('settings-close');
   const geminiKeyInput = document.getElementById('gemini-api-key');
   const geminiModelInput = document.getElementById('gemini-model');
   const saveSettings = document.getElementById('save-settings');
-  // load saved
+
+  // Settings modal functions
+  function openSettingsModal() {
+    settingsModal.classList.remove('hidden');
+    settingsModal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeSettingsModal() {
+    settingsModal.classList.add('hidden');
+    settingsModal.setAttribute('aria-hidden', 'true');
+  }
+
+  settingsToggle.addEventListener('click', openSettingsModal);
+  settingsClose.addEventListener('click', closeSettingsModal);
+  settingsModal.addEventListener('click', (e) => {
+    if (e.target === settingsModal) closeSettingsModal();
+  });
+
+  // load saved settings
   try {
     const savedKey = localStorage.getItem('aster_gemini_api_key') || '';
     const savedModel = localStorage.getItem('aster_gemini_model') || 'gemini-2.5-pro';
     if (geminiKeyInput && !geminiKeyInput.value) geminiKeyInput.value = savedKey;
     if (geminiModelInput && !geminiModelInput.value) geminiModelInput.value = savedModel;
   } catch {}
+
   saveSettings?.addEventListener('click', () => {
     try {
       localStorage.setItem('aster_gemini_api_key', geminiKeyInput?.value || '');
       localStorage.setItem('aster_gemini_model', geminiModelInput?.value || 'gemini-2.5-pro');
       alert('설정이 저장되었습니다.');
+      closeSettingsModal();
     } catch {}
   });
 
@@ -198,7 +385,7 @@ async function main() {
     }, openPicker);
     rows.push({ row, get, set });
     traitsContainer.appendChild(row);
-    if (!pref) openPicker((chosenName) => { try { set({ charm_name: chosenName, stage: '' }); } catch {} });
+    if (!pref) openPicker((chosenName) => { try { set({ charm_name: chosenName, stage: '5' }); } catch {} });
   }
   function clearRows() { rows.splice(0, rows.length); traitsContainer.innerHTML = ''; }
 
@@ -237,9 +424,15 @@ async function main() {
       if (!key) throw new Error('Gemini API 키가 필요합니다. 설정에서 입력하세요.');
       if (!generateUrl) throw new Error('음악 생성 엔드포인트가 비었습니다.');
 
+      // UI 업데이트: 생성 중 상태
+      generateBtn.classList.add('generating');
+      generateBtn.querySelector('.loading-spinner').classList.remove('hidden');
+      generateBtn.querySelector('.music-icon').style.display = 'none';
+      generateBtn.disabled = true;
+
       const constellation = { traits: rows.map(r => r.get()).filter(t => t.charm_name) };
       const context = {
-        duration_seconds: Number(durationSelect.value || 30)
+        duration_seconds: Number(durationSelect.value || 60)
       };
 
       status.textContent = '로컬 프롬프트 생성 중...';
@@ -259,17 +452,28 @@ async function main() {
       const data = await genRes.json();
       if (!data.audio_base64) throw new Error('오디오가 없습니다.');
 
-      const a = document.createElement('a');
-      a.href = `data:${data.mime || 'audio/wav'};base64,${data.audio_base64}`;
-      a.download = 'aster_alarm.wav';
-      a.click();
-      status.textContent = '다운로드 완료';
+      // 사용자 이름 기반 제목 생성
+      const userName = document.getElementById('user-name')?.value?.trim() || '나의';
+      const trackTitle = `${userName} 매력 벨소리`;
+      
+      // 플레이어에 음악 로드
+      musicPlayer.loadAudio(data.audio_base64, data.mime || 'audio/wav', trackTitle);
+      
+      status.textContent = '음악이 준비되었습니다! 🎵 재생해보세요 ✨';
     } catch (e) {
       status.textContent = '실패: ' + (e.message || e);
+    } finally {
+      // UI 복원
+      generateBtn.classList.remove('generating');
+      generateBtn.querySelector('.loading-spinner').classList.add('hidden');
+      generateBtn.querySelector('.music-icon').style.display = 'inline';
+      updateGenerateDisabled();
     }
   });
 
-  // Seed with two empty rows by default
+  // Seed with four empty rows by default (초기 매력 4개)
+  addRow();
+  addRow();
   addRow();
   addRow();
 }
