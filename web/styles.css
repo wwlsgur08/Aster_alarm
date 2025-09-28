@@ -99,7 +99,7 @@ body {
 /* 메인 제목 */
 .main-title {
   font-family: 'Orbitron', sans-serif;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   text-align: center;
   margin: 0 0 24px 0;
@@ -323,9 +323,9 @@ body {
 .charm-row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
 }
 
 .charm-button {
@@ -352,14 +352,14 @@ body {
 }
 
 .charm-stage {
-  width: 80px;
-  padding: 8px 12px;
+  width: 70px;
+  padding: 8px 8px;
   background: transparent;
   border: 2px solid var(--accent-yellow);
   border-radius: 8px;
   color: var(--text-primary);
   text-align: center;
-  font-size: 1rem;
+  font-size: 0.9rem;
   transition: all 0.3s ease;
 }
 
@@ -378,18 +378,19 @@ body {
 }
 
 .remove-charm-btn {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .remove-charm-btn:hover {
@@ -778,7 +779,7 @@ body {
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .main-title {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
   
   .music-player {
@@ -803,14 +804,31 @@ body {
     font-size: 1.1rem;
   }
   
+  /* 모바일에서 매력 행을 한 줄로 유지 */
   .charm-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .charm-button {
+    flex: 1;
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    min-height: 44px;
   }
   
   .charm-stage {
-    width: 100%;
+    width: 60px;
+    padding: 6px 4px;
+    font-size: 0.85rem;
+  }
+  
+  .remove-charm-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
   }
   
   .picker-body {
@@ -828,5 +846,42 @@ body {
     width: 40px;
     height: 40px;
     font-size: 1rem;
+  }
+}
+
+/* 더 작은 모바일 화면 */
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 1.4rem;
+  }
+  
+  .main-container {
+    padding: 16px 12px;
+  }
+  
+  .charm-row {
+    gap: 6px;
+  }
+  
+  .charm-button {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+  
+  .charm-stage {
+    width: 55px;
+    padding: 4px 2px;
+    font-size: 0.8rem;
+  }
+  
+  .remove-charm-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  
+  .generate-btn {
+    font-size: 1rem;
+    padding: 14px 20px;
   }
 }
