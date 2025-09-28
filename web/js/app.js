@@ -284,8 +284,8 @@ async function main() {
   durationSelect.addEventListener('input', updateDurationDisplay);
   updateDurationDisplay(); // 초기 표시
 
-  // Defaults
-  const defaultGenerate = 'http://localhost:8080/generate';
+  // Defaults - use relative path for Vercel deployment
+  const defaultGenerate = '/api/generate';
   if (apiEndpoint && !apiEndpoint.value) apiEndpoint.value = defaultGenerate;
 
   // Settings Modal (simplified - no need for Gemini API key input)
