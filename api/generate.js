@@ -137,6 +137,16 @@ export default async function handler(req, res) {
     }
 
     const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    
+    // Debug logging (remove in production)
+    console.log('Environment check:', {
+      hasStabilityKey: !!STABILITY_API_KEY,
+      hasGeminiKey: !!GEMINI_API_KEY,
+      stabilityKeyLength: STABILITY_API_KEY ? STABILITY_API_KEY.length : 0,
+      geminiKeyLength: GEMINI_API_KEY ? GEMINI_API_KEY.length : 0
+    });
+    
     if (!STABILITY_API_KEY) {
       throw new Error('STABILITY_API_KEY not configured in environment variables');
     }
