@@ -2,7 +2,7 @@
 import { fillTemplate } from './templates.js';
 
 async function loadDB() {
-  const res = await fetch('../data/sound_map.json');
+  const res = await fetch('./sound_map.json');
   if (!res.ok) throw new Error('sound_map.json 로드 실패');
   return res.json();
 }
