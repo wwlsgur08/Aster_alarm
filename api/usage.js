@@ -3,7 +3,6 @@ let ipUsage = global.ipUsage || new Map();
 global.ipUsage = ipUsage;
 
 const MAX_USES_PER_IP = 2;
-const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 function getClientIP(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
@@ -13,18 +12,11 @@ function getClientIP(req) {
 }
 
 function checkIPLimit(ip) {
-  const now = new Date();
   const usage = ipUsage.get(ip);
   
   if (!usage) {
-    ipUsage.set(ip, { count: 0, lastReset: now });
+    ipUsage.set(ip, { count: 0, createdAt: new Date() });
     return { allowed: true, remaining: MAX_USES_PER_IP, used: 0 };
-  }
-  
-  // Reset if 24 hours have passed
-  if (now - usage.lastReset > RESET_INTERVAL) {
-    usage.count = 0;
-    usage.lastReset = now;
   }
   
   const remaining = MAX_USES_PER_IP - usage.count;

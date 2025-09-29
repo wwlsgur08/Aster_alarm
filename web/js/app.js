@@ -339,8 +339,8 @@ async function main() {
   async function updateUsageDisplay() {
     try {
       const usage = await checkUsage();
-      const usageInfo = `1인당 2회까지 생성할 수 있습니다 (${usage.used || 0}/${usage.maxUses || 2})`;
-      if (status.textContent === '' || status.textContent.includes('생성할 수 있습니다')) {
+      const usageInfo = `1인당 평생 2회로 제한됩니다 (${usage.used || 0}/${usage.maxUses || 2})`;
+      if (status.textContent === '' || status.textContent.includes('제한됩니다')) {
         status.textContent = usageInfo;
       }
       generateBtn.disabled = (usage.remaining || 0) <= 0 || rows.map(r => r.get()).filter(t => t.charm_name).length === 0;
@@ -496,8 +496,8 @@ async function main() {
       // 사용량 업데이트
       await updateUsageDisplay();
     } catch (e) {
-      if (e.message.includes('429') || e.message.includes('한도') || e.message.includes('1인당')) {
-        status.textContent = '1인당 2회까지 생성할 수 있습니다. 24시간 후 다시 시도해주세요.';
+      if (e.message.includes('429') || e.message.includes('한도') || e.message.includes('평생') || e.message.includes('제한')) {
+        status.textContent = '1인당 평생 2회로 제한됩니다. 한도를 모두 사용하셨습니다.';
       } else {
         status.textContent = '실패: ' + (e.message || e);
       }

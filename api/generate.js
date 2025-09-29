@@ -3,7 +3,6 @@ let ipUsage = global.ipUsage || new Map();
 global.ipUsage = ipUsage;
 
 const MAX_USES_PER_IP = 2;
-const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
 function getClientIP(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 
@@ -13,18 +12,11 @@ function getClientIP(req) {
 }
 
 function checkIPLimit(ip) {
-  const now = new Date();
   const usage = ipUsage.get(ip);
   
   if (!usage) {
-    ipUsage.set(ip, { count: 0, lastReset: now });
+    ipUsage.set(ip, { count: 0, createdAt: new Date() });
     return { allowed: true, remaining: MAX_USES_PER_IP, used: 0 };
-  }
-  
-  // Reset if 24 hours have passed
-  if (now - usage.lastReset > RESET_INTERVAL) {
-    usage.count = 0;
-    usage.lastReset = now;
   }
   
   const remaining = MAX_USES_PER_IP - usage.count;
@@ -38,7 +30,7 @@ function incrementIPUsage(ip) {
     usage.count = Math.min(usage.count + 1, MAX_USES_PER_IP);
   } else {
     // If for some reason usage doesn't exist, create it
-    ipUsage.set(ip, { count: 1, lastReset: new Date() });
+    ipUsage.set(ip, { count: 1, createdAt: new Date() });
   }
   console.log(`IP ${ip} usage incremented. New count: ${usage ? usage.count : 1}`);
 }
@@ -138,7 +130,7 @@ export default async function handler(req, res) {
     const { allowed, remaining, used } = checkIPLimit(clientIP);
     if (!allowed) {
       return res.status(429).json({ 
-        error: '1인당 2회까지 생성할 수 있습니다. 24시간 후 다시 시도해주세요.',
+        error: '1인당 평생 2회로 제한됩니다. 한도를 모두 사용하셨습니다.',
         remaining: 0,
         used: MAX_USES_PER_IP
       });
