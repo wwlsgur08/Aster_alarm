@@ -62,15 +62,15 @@ body {
   width: 100%;
   height: 100%;
   background-image: 
-    radial-gradient(2px 2px at 20px 30px, white, transparent),
-    radial-gradient(2px 2px at 40px 70px, white, transparent),
-    radial-gradient(1px 1px at 90px 40px, white, transparent),
-    radial-gradient(1px 1px at 130px 80px, white, transparent),
-    radial-gradient(2px 2px at 160px 30px, white, transparent);
+    radial-gradient(1px 1px at 20px 30px, var(--text-cyan-300), transparent),
+    radial-gradient(1px 1px at 40px 70px, var(--text-cyan-300), transparent),
+    radial-gradient(1px 1px at 90px 40px, var(--text-white), transparent),
+    radial-gradient(1.5px 1.5px at 130px 80px, var(--text-cyan-300), transparent),
+    radial-gradient(1px 1px at 160px 30px, var(--text-white), transparent);
   background-repeat: repeat;
   background-size: 200px 100px;
   animation: sparkle 8s linear infinite;
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 @keyframes sparkle {
@@ -137,12 +137,12 @@ body {
 .music-player {
   width: 100%;
   margin-bottom: 40px;
-  background: linear-gradient(135deg, rgba(147, 112, 219, 0.15), rgba(59, 130, 246, 0.15));
-  border: 2px solid var(--border-color);
-  border-radius: 16px;
+  background: linear-gradient(to bottom right, var(--bg-slate-800-60), var(--bg-blue-900-60));
+  border: 1px solid var(--border-color);
+  border-radius: 24px; /* softer shape */
   padding: 24px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px); /* backdrop-blur-sm */
+  box-shadow: 0 8px 32px var(--shadow-cyan-400-10);
 }
 
 .player-container {
@@ -566,13 +566,14 @@ body {
 }
 
 .modal-content {
-  background: var(--bg-primary);
-  border: 2px dashed rgba(251, 191, 36, 0.7);
-  border-radius: 12px;
+  background: linear-gradient(to bottom right, var(--bg-slate-800-60), var(--bg-blue-900-60));
+  border: 1px solid var(--border-color);
+  border-radius: 24px; /* softer shape */
   max-width: 90vw;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 10px 30px var(--shadow-cyan-400-10);
 }
 
 .modal-header {
