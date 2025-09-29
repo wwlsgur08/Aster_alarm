@@ -14,9 +14,12 @@
     <div class="starry-background"></div>
 
     <div class="main-container">
-      <!-- 로고 -->
-      <div class="logo-container">
-        <img src="./images/logo.png" alt="Aster Alarm Logo" class="logo-image">
+      <!-- 상단 헤더 (로고 + 설정 버튼) -->
+      <div class="header-bar">
+        <img src="./images/logo.png" alt="Aster Alarm Logo" class="header-logo">
+        <button id="settings-toggle" type="button" class="settings-btn" title="설정">
+          ⚙️
+        </button>
       </div>
 
       <!-- 제목 -->
@@ -100,10 +103,7 @@
       <!-- 상태 표시 -->
       <div id="gen-status" class="status-display"></div>
 
-      <!-- 설정 버튼 (톱니바퀴) -->
-      <button id="settings-toggle" type="button" class="settings-btn" title="설정">
-        ⚙️
-      </button>
+      <!-- 설정 버튼은 헤더바로 이동 -->
 
       <!-- JSON 관리 버튼들 (숨김) -->
       <div class="json-controls hidden">

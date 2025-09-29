@@ -74,14 +74,19 @@ body {
   align-items: center;
 }
 
-/* 로고 */
-.logo-container {
-  margin-bottom: 4px;
+/* 상단 헤더 바 */
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 0 8px;
 }
 
-.logo-image {
-  width: 150px;
-  height: 150px;
+.header-logo {
+  width: 60px;
+  height: 60px;
   object-fit: contain;
 }
 
@@ -494,9 +499,6 @@ body {
 
 /* 설정 버튼 */
 .settings-btn {
-  position: fixed;
-  top: 24px;
-  right: 24px;
   width: 48px;
   height: 48px;
   background: rgba(0, 0, 0, 0.5);
@@ -795,9 +797,15 @@ body {
     font-size: 1.6rem;
   }
   
-  .logo-image {
-    width: 120px;
-    height: 120px;
+  .header-logo {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .settings-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
   
   .music-player {
@@ -857,14 +865,6 @@ body {
     border-right: none;
     border-bottom: 1px solid var(--border-color);
   }
-  
-  .settings-btn {
-    top: 16px;
-    right: 16px;
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
 }
 
 /* 더 작은 모바일 화면 */
@@ -877,9 +877,15 @@ body {
     padding: 16px 12px;
   }
   
-  .logo-image {
-    width: 100px;
-    height: 100px;
+  .header-logo {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .settings-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
   }
   
   .charm-row {
