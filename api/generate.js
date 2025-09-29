@@ -154,7 +154,7 @@ function categoryNoteLookup(charmName) {
   return { category: 'Unknown', root: 'C', keywords: ['Unknown'] };
 }
 
-// Improved composition logic (복잡한 로직 적용)
+// Improved composition logic (완전한 로컬 서버와 동일)
 function composeLocal(constellation, context = {}) {
   const { traits = [] } = constellation;
   const durationSeconds = context.duration_seconds || 60;
@@ -166,35 +166,51 @@ function composeLocal(constellation, context = {}) {
       ...trait,
       category: info.category,
       root: info.root,
-      keywords: info.keywords
+      keywords: info.keywords,
+      stage: parseInt(trait.stage) || 1  // 숫자로 변환
     };
   });
   
-  // Sort by stage (higher first)
-  enrichedTraits.sort((a, b) => (parseInt(b.stage) || 1) - (parseInt(a.stage) || 1));
+  // Sort by stage (higher first), then by root note priority on ties
+  const noteToNumber = { C: 1, D: 2, E: 3, F: 4, G: 5, A: 6, B: 7 };
+  enrichedTraits.sort((a, b) => {
+    if (b.stage !== a.stage) return b.stage - a.stage;
+    return (noteToNumber[b.root] || 4) - (noteToNumber[a.root] || 4);
+  });
   
   const lead = enrichedTraits[0];
   const supports = enrichedTraits.slice(1, 3);
   const fx = enrichedTraits.slice(3, 5);
   const ambience = enrichedTraits.slice(5);
   
-  // Generate core notes
+  // Generate core notes (lead + supports, remove duplicates, max 3)
   const coreNotes = [lead, ...supports]
     .map(t => t.root)
     .filter(Boolean)
     .filter((note, idx, arr) => arr.indexOf(note) === idx)
     .slice(0, 3);
   
-  // Calculate tempo based on notes
-  const noteToNumber = { C: 1, D: 2, E: 3, F: 4, G: 5, A: 6, B: 7 };
+  // Calculate tempo based on average note value
   const avgNote = enrichedTraits.reduce((sum, t) => sum + (noteToNumber[t.root] || 4), 0) / enrichedTraits.length;
   
   let tempo = { label: 'Moderato', bpm: 95 };
   if (avgNote <= 2.5) tempo = { label: 'Adagio', bpm: 65 };
   else if (avgNote >= 4.6) tempo = { label: 'Allegro', bpm: 125 };
   
-  // Get instrument from lead trait
+  // Extract lead instrument from first keyword
   const leadInstrument = lead?.keywords?.[0]?.split('(')[0]?.trim() || '피아노';
+  
+  // Generate rhythm based on lead stage
+  let rhythmText = '안정적이고 걷는듯한 보통 빠르기의';
+  let rhythmDetail = '4분음표 중심의 리듬';
+  
+  if (lead?.stage <= 2) {
+    rhythmText = '짧고 리드미컬하며 경쾌한';
+    rhythmDetail = '8분음표 중심의 리듬';
+  } else if (lead?.stage >= 5) {
+    rhythmText = '길고 여유로우며 서정적인 호흡의';
+    rhythmDetail = '점4분음표 중심의 리듬';
+  }
   
   return {
     duration_seconds: durationSeconds,
@@ -207,13 +223,13 @@ function composeLocal(constellation, context = {}) {
     melody: {
       core_notes: coreNotes,
       notes_text: coreNotes.join(', '),
-      rhythm_text: '안정적이고 걷는듯한 보통 빠르기의',
-      rhythm_detail: '4분음표 중심의 리듬'
+      rhythm_text: rhythmText,
+      rhythm_detail: rhythmDetail
     },
     instruments: {
       lead: leadInstrument,
-      support: ['현악기', '패드'],
-      fx: ['벨']
+      support: supports.map(s => s.keywords?.[0]?.split('(')[0]?.trim()).filter(Boolean) || ['현악기', '패드'],
+      fx: fx.map(f => f.keywords?.[0]?.split('(')[0]?.trim()).filter(Boolean) || ['벨']
     },
     genres: ['Ambient', 'Cinematic'],
     tempo,
