@@ -702,12 +702,12 @@ body {
 .picker-body {
   display: grid;
   grid-template-columns: 1fr 1.4fr;
-  min-height: 400px;
+  min-height: 350px;
 }
 
 .picker-categories {
   border-right: 1px solid var(--border-color);
-  padding: 16px;
+  padding: 12px;
   background: rgba(147, 112, 219, 0.05);
 }
 
@@ -737,7 +737,7 @@ body {
 }
 
 .picker-charms {
-  padding: 16px;
+  padding: 12px;
 }
 
 .picker-charms .hint {
