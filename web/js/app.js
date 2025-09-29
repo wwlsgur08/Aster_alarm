@@ -472,6 +472,10 @@ async function main() {
     });
     
     generateBtn.disabled = !(hasGen && hasTraits);
+    
+    // 강제로 버튼 활성화 (임시 디버깅)
+    console.log('강제로 버튼 활성화');
+    generateBtn.disabled = false;
   }
   
   apiEndpoint?.addEventListener('input', updateGenerateDisabled);
