@@ -21,7 +21,7 @@ function el(tag, attrs = {}, children = []) {
 function clampStage(v) {
   const n = Number(v);
   if (!Number.isFinite(n)) return '';
-  return Math.min(10, Math.max(1, Math.round(n))); // 1~10 범위로 변경
+  return Math.min(6, Math.max(1, Math.round(n))); // 1~6 범위로 변경
 }
 
 function buildTraitRow(value = { charm_name: '', stage: '' }, onRemove, openPicker) {
@@ -35,10 +35,10 @@ function buildTraitRow(value = { charm_name: '', stage: '' }, onRemove, openPick
   const stage = el('input', { 
     class: `charm-stage ${!value.charm_name ? 'disabled' : ''}`,
     type: 'number', 
-    placeholder: '1~10', 
+    placeholder: '1~6', 
     value: value.stage ?? '', 
     min: '1', 
-    max: '10', 
+    max: '6', 
     step: '1' 
   });
   
@@ -339,7 +339,7 @@ async function main() {
   async function updateUsageDisplay() {
     try {
       const usage = await checkUsage();
-      const usageInfo = `1인당 평생 2회로 제한됩니다 (${usage.used || 0}/${usage.maxUses || 2})`;
+      const usageInfo = `1인당 2회로 제한됩니다 (${usage.used || 0}/${usage.maxUses || 2})`;
       if (status.textContent === '' || status.textContent.includes('제한됩니다')) {
         status.textContent = usageInfo;
       }
@@ -496,8 +496,8 @@ async function main() {
       // 사용량 업데이트
       await updateUsageDisplay();
     } catch (e) {
-      if (e.message.includes('429') || e.message.includes('한도') || e.message.includes('평생') || e.message.includes('제한')) {
-        status.textContent = '1인당 평생 2회로 제한됩니다. 한도를 모두 사용하셨습니다.';
+      if (e.message.includes('429') || e.message.includes('한도') || e.message.includes('제한')) {
+        status.textContent = '1인당 2회로 제한됩니다. 한도를 모두 사용하셨습니다.';
       } else {
         status.textContent = '실패: ' + (e.message || e);
       }

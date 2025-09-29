@@ -130,7 +130,7 @@ export default async function handler(req, res) {
     const { allowed, remaining, used } = checkIPLimit(clientIP);
     if (!allowed) {
       return res.status(429).json({ 
-        error: '1인당 평생 2회로 제한됩니다. 한도를 모두 사용하셨습니다.',
+        error: '1인당 2회로 제한됩니다. 한도를 모두 사용하셨습니다.',
         remaining: 0,
         used: MAX_USES_PER_IP
       });
