@@ -225,9 +225,42 @@ function composeLocal(constellation, context = {}) {
 }
 
 function fillTemplate(spec) {
-  const { melody, instruments, tempo, keywords, duration_seconds } = spec;
+  const { melody, instruments, tempo, keywords, duration_seconds, roles } = spec;
   
-  return `${duration_seconds}초 길이의 벨소리. 메인 멜로디는 ${instruments.lead}로 연주되며, 핵심 음은 ${melody?.notes_text || 'C, D, E'}입니다. The core notes of the melody should be ${melody?.core_notes?.join(', ') || 'C, D, E'}. 리듬은 ${melody?.rhythm_text || '안정적이고 걷는듯한 보통 빠르기의'} 특징을 보입니다. 템포는 ${tempo.label} 약 ${tempo.bpm} BPM입니다. 전체적인 분위기는 ${keywords.slice(0, 3).join(', ')}입니다.`;
+  // Get trait names for context
+  const allTraits = [
+    ...(roles?.lead || []),
+    ...(roles?.support || []),
+    ...(roles?.fx || []),
+    ...(roles?.ambience || [])
+  ];
+  const traitNames = allTraits.map(t => t.charm_name).filter(Boolean).join(', ');
+  
+  // Build comprehensive prompt
+  let promptParts = [
+    `${duration_seconds}초 길이의 개인 맞춤 벨소리`,
+    `메인 멜로디는 ${instruments.lead}로 연주`,
+    `핵심 음계: ${melody?.notes_text || 'C, D, E'}`,
+    `The core notes should be ${melody?.core_notes?.join(', ') || 'C, D, E'}`,
+    `리듬: ${melody?.rhythm_text || '안정적이고 걷는듯한 보통 빠르기'}`,
+    `템포: ${tempo.label} (${tempo.bpm} BPM)`,
+    `조성: ${spec.key || 'C'} major`,
+    `박자: ${spec.time_signature || '4/4'}`
+  ];
+  
+  if (traitNames) {
+    promptParts.push(`개성: ${traitNames} 특성 반영`);
+  }
+  
+  if (keywords && keywords.length > 0) {
+    promptParts.push(`분위기: ${keywords.slice(0, 4).join(', ')}`);
+  }
+  
+  if (spec.avoid && spec.avoid.length > 0) {
+    promptParts.push(`주의사항: ${spec.avoid.join(', ')} 요소 제외`);
+  }
+  
+  return promptParts.join('. ') + '.';
 }
 
 async function optimizePromptViaGemini(spec, prompt) {
@@ -238,7 +271,11 @@ async function optimizePromptViaGemini(spec, prompt) {
   }
 
   try {
-    const systemPrompt = `당신은 한국어 음악 프롬프트 에디터입니다. 음악 생성 모델에 적합하도록 한국어 프롬프트를 다듬고 더 자연스럽게 개선하세요. 반환은 한국어 최종 프롬프트 텍스트만 출력하세요.`;
+    const systemPrompt = `당신은 한국어 음악 프롬프트 에디터입니다. 
+아래 스펙과 초안 프롬프트를 참고하여, 음악 생성 모델에 적합하도록 한국어 프롬프트를 다듬고 더 자연스럽게 개선하세요. 
+의미(길이, 템포, 역할, 핵심 음, 악기 등)는 반드시 유지하고, 불필요한 중복을 제거하세요. 
+벨소리로 적합하도록 맑고 깨끗한 음질을 강조하세요.
+반환은 한국어 최종 프롬프트 텍스트만, 코드블록/JSON 없이 한글 문장으로만 출력하세요.`;
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
     const body = {
@@ -325,12 +362,16 @@ export default async function handler(req, res) {
 
     // Step 3: Generate music
     console.log('Step 3: Generating music...');
+    
+    // Build comprehensive prompt with genres and additional context
     const fullPrompt = [
       prompt,
-      spec.genres?.length ? `Genres: ${spec.genres.join(', ')}` : '',
-      `Tempo: ${spec.tempo?.label} (${spec.tempo?.bpm} BPM)`,
-      `Lead instrument: ${spec.instruments.lead}`,
-      `Mood: ${spec.keywords.slice(0,3).join(', ')}`
+      spec.genres?.length ? `장르: ${spec.genres.join(', ')}` : '',
+      `악기 구성: 메인 ${spec.instruments.lead}, 서포트 ${spec.instruments.support?.join('/')}`,
+      spec.roles?.lead?.length ? `주도 특성: ${spec.roles.lead.map(t => t.charm_name).join(', ')}` : '',
+      spec.roles?.support?.length ? `보조 특성: ${spec.roles.support.map(t => t.charm_name).join(', ')}` : '',
+      'high quality, clear, professional ringtone',
+      'well-balanced mix, pleasant for phone notifications'
     ].filter(Boolean).join('. ');
 
     // Use FormData for Stability AI
