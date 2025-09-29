@@ -76,7 +76,7 @@ body {
 
 /* 로고 */
 .logo-container {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .logo-image {
@@ -91,7 +91,7 @@ body {
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
-  margin: 0 0 16px 0;
+  margin: 0 0 24px 0;
   background: linear-gradient(135deg, var(--text-primary), var(--accent-yellow));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
