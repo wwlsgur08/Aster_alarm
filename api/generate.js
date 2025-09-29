@@ -35,26 +35,26 @@ function incrementIPUsage(ip) {
   console.log(`IP ${ip} usage incremented. New count: ${usage ? usage.count : 1}`);
 }
 
-// Load sound_map for categoryNoteLookup
+// Load actual sound_map from server data (정확한 데이터 사용)
 const sound_map_data = {
   "sound_map": [
     {
-      "category_name": "정서적안정및자기인식",
+      "category_name": "정서적 안정 및 자기 인식",
       "musical_note": "Do",
       "international_note": "C",
       "charms": [
-        {"charm_name": "침착함", "keywords": ["Alto Flute (soft, breathy, short phrases)", "Calm", "Breathing"]},
+        {"charm_name": "침착함", "keywords": ["Low Flute", "Calm", "Breathing"]},
         {"charm_name": "안정감", "keywords": ["Cello (long notes)", "Stable", "Sustained"]},
         {"charm_name": "자기성찰", "keywords": ["Ambient Synth Pad", "Introspective", "Spacious"]},
         {"charm_name": "긍정성", "keywords": ["Acoustic Guitar (Arpeggio)", "Hopeful", "Peaceful"]},
-        {"charm_name": "현실감각", "keywords": ["Upright Bass (pizzicato, short decay)", "Grounded", "Foundation"]},
+        {"charm_name": "현실감각", "keywords": ["Upright Bass (arco)", "Grounded", "Foundation"]},
         {"charm_name": "자기객관화", "keywords": ["Muted Piano", "Clear", "Muted", "Reflective"]},
         {"charm_name": "자존감", "keywords": ["Warm Pad", "Self-love", "Enveloping"]},
-        {"charm_name": "겸손", "keywords": ["Flugelhorn (soft)", "Humble", "Not too loud"]}
+        {"charm_name": "겸손", "keywords": ["Muted Trumpet", "Humble", "Not too loud"]}
       ]
     },
     {
-      "category_name": "성실성및책임감",
+      "category_name": "성실성 및 책임감",
       "musical_note": "Re",
       "international_note": "D",
       "charms": [
@@ -68,7 +68,7 @@ const sound_map_data = {
       ]
     },
     {
-      "category_name": "이해심및공감능력",
+      "category_name": "이해심 및 공감 능력",
       "musical_note": "Mi",
       "international_note": "E",
       "charms": [
@@ -82,7 +82,7 @@ const sound_map_data = {
       ]
     },
     {
-      "category_name": "유머감각및사교성",
+      "category_name": "유머 감각 및 사교성",
       "musical_note": "La",
       "international_note": "A",
       "charms": [
@@ -95,7 +95,7 @@ const sound_map_data = {
       ]
     },
     {
-      "category_name": "도덕성및양심",
+      "category_name": "도덕성 및 양심",
       "musical_note": "Sol",
       "international_note": "G",
       "charms": [
@@ -108,7 +108,7 @@ const sound_map_data = {
       ]
     },
     {
-      "category_name": "지적호기심및개방성",
+      "category_name": "지적 호기심 및 개방성",
       "musical_note": "Fa",
       "international_note": "F",
       "charms": [
@@ -123,7 +123,7 @@ const sound_map_data = {
       ]
     },
     {
-      "category_name": "목표지향성및야망",
+      "category_name": "목표 지향성 및 야망",
       "musical_note": "Si",
       "international_note": "B",
       "charms": [
