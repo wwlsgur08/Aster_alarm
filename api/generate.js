@@ -154,89 +154,142 @@ function categoryNoteLookup(charmName) {
   return { category: 'Unknown', root: 'C', keywords: ['Unknown'] };
 }
 
-// Improved composition logic (완전한 로컬 서버와 동일)
-function composeLocal(constellation, context = {}) {
-  const { traits = [] } = constellation;
-  const durationSeconds = context.duration_seconds || 60;
-  
-  // Enrich traits with DB info
-  const enrichedTraits = traits.map(trait => {
-    const info = categoryNoteLookup(trait.charm_name);
-    return {
-      ...trait,
-      category: info.category,
-      root: info.root,
-      keywords: info.keywords,
-      stage: parseInt(trait.stage) || 1  // 숫자로 변환
-    };
-  });
-  
-  // Sort by stage (higher first), then by root note priority on ties
-  const noteToNumber = { C: 1, D: 2, E: 3, F: 4, G: 5, A: 6, B: 7 };
-  enrichedTraits.sort((a, b) => {
-    if (b.stage !== a.stage) return b.stage - a.stage;
-    return (noteToNumber[b.root] || 4) - (noteToNumber[a.root] || 4);
-  });
-  
-  const lead = enrichedTraits[0];
-  const supports = enrichedTraits.slice(1, 3);
-  const fx = enrichedTraits.slice(3, 5);
-  const ambience = enrichedTraits.slice(5);
-  
-  // Generate core notes (lead + supports, remove duplicates, max 3)
-  const coreNotes = [lead, ...supports]
-    .map(t => t.root)
-    .filter(Boolean)
-    .filter((note, idx, arr) => arr.indexOf(note) === idx)
-    .slice(0, 3);
-  
-  // Calculate tempo based on average note value
-  const avgNote = enrichedTraits.reduce((sum, t) => sum + (noteToNumber[t.root] || 4), 0) / enrichedTraits.length;
-  
-  let tempo = { label: 'Moderato', bpm: 95 };
-  if (avgNote <= 2.5) tempo = { label: 'Adagio', bpm: 65 };
-  else if (avgNote >= 4.6) tempo = { label: 'Allegro', bpm: 125 };
-  
-  // Extract lead instrument from first keyword
-  const leadInstrument = lead?.keywords?.[0]?.split('(')[0]?.trim() || '피아노';
-  
-  // Generate rhythm based on lead stage
-  let rhythmText = '안정적이고 걷는듯한 보통 빠르기의';
-  let rhythmDetail = '4분음표 중심의 리듬';
-  
-  if (lead?.stage <= 2) {
-    rhythmText = '짧고 리드미컬하며 경쾌한';
-    rhythmDetail = '8분음표 중심의 리듬';
-  } else if (lead?.stage >= 5) {
-    rhythmText = '길고 여유로우며 서정적인 호흡의';
-    rhythmDetail = '점4분음표 중심의 리듬';
+// 웹 클라이언트와 완전히 동일한 분석 시스템 복사
+function findCharm(db, charmName) {
+  for (const cat of db.sound_map || []) {
+    for (const c of cat.charms || []) {
+      if (c.charm_name === charmName) {
+        return { category: cat.category_name, root: cat.international_note, keywords: c.keywords || [] };
+      }
+    }
   }
-  
+  return { category: null, root: null, keywords: [] };
+}
+
+function extractInstrumentAndMoods(keywords) {
+  if (!keywords || !keywords.length) return { instrument: null, moods: [] };
+  const [instrument, ...moods] = keywords;
+  return { instrument, moods };
+}
+
+function rhythmFromStageDetailed(stage) {
+  const n = Math.max(1, Math.min(6, Math.round(Number(stage || 1))));
+  switch (n) {
+    case 1:
+    case 2:
+      return {
+        ko: '8분음표 중심의 짧고 경쾌한 리듬',
+        en: 'eighth-note based, short and lively rhythm',
+        kw: '짧고 리드미컬하며 경쾌한',
+      };
+    case 3:
+    case 4:
+      return {
+        ko: '4분음표 중심의 안정적인 리듬',
+        en: 'quarter-note centered, stable rhythm',
+        kw: '안정적이고 걷는듯한 보통 빠르기의',
+      };
+    case 5:
+      return {
+        ko: '점4분음표 중심의 여유로운 리듬',
+        en: 'dotted quarter-note centered, unhurried rhythm',
+        kw: '길고 여유로우며 서정적인 호흡의',
+      };
+    case 6:
+    default:
+      return {
+        ko: '2분음표 중심의 더 긴 호흡의 리듬',
+        en: 'half-note centered, with a longer breath',
+        kw: '길고 여유로우며 서정적인 호흡의',
+      };
+  }
+}
+
+const NOTE_TO_DEGREE = { C: 1, D: 2, E: 3, F: 4, G: 5, A: 6, B: 7 };
+const NOTE_PRIORITY = { C: 1, D: 2, E: 3, F: 4, G: 5, A: 6, B: 7 };
+
+function tempoFromAverageScaleDegree(rootsAll) {
+  const degrees = rootsAll.map(r => NOTE_TO_DEGREE[r]).filter(v => typeof v === 'number');
+  const avg = degrees.length ? (degrees.reduce((a, b) => a + b, 0) / degrees.length) : 4;
+
+  if (avg < 2.0) return { bpm: 65, label: 'Adagio' };
+  if (avg < 3.0) return { bpm: 84, label: 'Andante' };
+  if (avg < 4.0) return { bpm: 96, label: 'Andantino' };
+  if (avg < 5.0) return { bpm: 108, label: 'Moderato' };
+  if (avg < 6.0) return { bpm: 116, label: 'Allegretto' };
+  return { bpm: 128, label: 'Allegro' };
+}
+
+function inferGenres(instruments, moodKeywords) {
+  const text = [ ...(instruments || []), ...(moodKeywords || []) ].join(' ').toLowerCase();
+  const out = [];
+  if (["piano","guitar","nylon","rhodes","wurlitzer","lofi"].some(k => text.includes(k))) out.push('lofi');
+  if (["orchestral","horn","strings","cinematic","timpani","fanfare"].some(k => text.includes(k))) out.push('cinematic');
+  if (["synth","ambient","pad","theremin","arpeggiator"].some(k => text.includes(k))) out.push('ambient');
+  if (!out.length) return ['lofi','ambient'];
+  return out.slice(0,3);
+}
+
+// 웹 클라이언트와 완전히 동일한 compose 함수
+function composeLocal(constellation, context = {}) {
+  const raw = constellation?.traits || [];
+  if (!raw.length) throw new Error('constellation.traits 가 비어 있습니다.');
+
+  const enriched = raw.map((t, idx) => {
+    const name = t.charm_name || t.name;
+    const stage = t.stage != null ? Number(t.stage) : 1;
+    const info = findCharm(sound_map_data, name);
+    const { instrument, moods } = extractInstrumentAndMoods(info.keywords);
+    return { idx, name, stage, category: info.category, root: info.root, instrument, moods };
+  });
+
+  enriched.sort((a,b) => {
+    const s = (b.stage || 0) - (a.stage || 0);
+    if (s !== 0) return s;
+    const ap = NOTE_PRIORITY[a.root] || 0;
+    const bp = NOTE_PRIORITY[b.root] || 0;
+    return bp - ap;
+  });
+
+  const lead = enriched[0];
+  const support = enriched.slice(1, 3);
+  const fx = enriched.slice(3, 5);
+  const ambience = enriched.slice(5);
+
+  const rhythm = rhythmFromStageDetailed(lead?.stage || 1);
+  const rootsAll = enriched.map(x => x.root).filter(Boolean);
+  const tempo = tempoFromAverageScaleDegree(rootsAll);
+
+  const leadInstrument = lead?.instrument || 'felt piano';
+  const coreNotes = [...new Set([lead?.root, ...support.map(s => s.root)].filter(Boolean))].slice(0,3);
+  const genres = inferGenres([leadInstrument, ...support.map(s=>s.instrument)], enriched.flatMap(x=>x.moods));
+
   return {
-    duration_seconds: durationSeconds,
+    duration_seconds: context?.duration_seconds || 60,
+    
     roles: {
       lead: lead ? [lead] : [],
-      support: supports,
+      support: support,
       fx: fx,
       ambience: ambience
     },
     melody: {
       core_notes: coreNotes,
       notes_text: coreNotes.join(', '),
-      rhythm_text: rhythmText,
-      rhythm_detail: rhythmDetail
+      rhythm_text: rhythm.kw,
+      rhythm_detail: rhythm.ko
     },
     instruments: {
       lead: leadInstrument,
-      support: supports.map(s => s.keywords?.[0]?.split('(')[0]?.trim()).filter(Boolean) || ['현악기', '패드'],
-      fx: fx.map(f => f.keywords?.[0]?.split('(')[0]?.trim()).filter(Boolean) || ['벨']
+      support: support.map(s => s.instrument).filter(Boolean) || ['현악기', '패드'],
+      fx: fx.map(f => f.instrument).filter(Boolean) || ['벨']
     },
-    genres: ['Ambient', 'Cinematic'],
-    tempo,
+    genres: genres,
+    tempo: tempo,
     key: coreNotes[0] || 'C',
     time_signature: '4/4',
-    keywords: enrichedTraits.flatMap(t => t.keywords).slice(0, 5),
-    avoid: ['너무 강한', '시끄러운', '불안한']
+    keywords: [...new Set(enriched.flatMap(x => x?.moods || []))].slice(0,6),
+    avoid: ['sad', 'melancholic']
   };
 }
 
