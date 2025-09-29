@@ -74,11 +74,25 @@ body {
   align-items: center;
 }
 
+/* 상단 헤더 */
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 8px; /* 좌우 패딩 추가 */
+}
+
+.header-placeholder {
+  width: 48px; /* 설정 버튼과 동일한 너비 */
+  flex-shrink: 0;
+}
+
 /* 로고 */
 .logo-container {
-  text-align: center;
-  margin-bottom: 12px;
-  margin-top: 0;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .logo-image {
@@ -496,9 +510,6 @@ body {
 
 /* 설정 버튼 */
 .settings-btn {
-  position: absolute;
-  top: 16px;
-  right: 24px;
   width: 48px;
   height: 48px;
   background: rgba(0, 0, 0, 0.5);
@@ -509,7 +520,7 @@ body {
   cursor: pointer;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
-  z-index: 100;
+  flex-shrink: 0; /* 크기 유지 */
 }
 
 .settings-btn:hover {
