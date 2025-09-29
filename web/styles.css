@@ -890,12 +890,38 @@ body {
   }
   
   .picker-body {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
   }
   
   .picker-categories {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    flex-wrap: nowrap;
     border-right: none;
     border-bottom: 1px solid var(--border-color);
+    padding: 8px;
+    gap: 8px;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
+  .picker-categories::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+  
+  .picker-category {
+    flex: 0 0 auto;
+    width: 120px;
+    padding: 8px;
+    margin-bottom: 0;
+  }
+
+  .picker-charms {
+    flex-grow: 1;
+    overflow-y: auto;
   }
 }
 

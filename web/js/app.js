@@ -511,10 +511,10 @@ async function main() {
   });
 
   // Seed with four empty rows by default (초기 매력 4개)
-  addRow();
-  addRow();
-  addRow();
-  addRow();
+  addRow({ charm_name: '', stage: '' });
+  addRow({ charm_name: '', stage: '' });
+  addRow({ charm_name: '', stage: '' });
+  addRow({ charm_name: '', stage: '' });
 }
 
 main().catch(err => alert(err.message || err));
