@@ -338,6 +338,7 @@ async function main() {
   // 사용량 표시 업데이트 (항상 무제한 표시)
   async function updateUsageDisplay() {
     status.textContent = '매력을 선택하고 음악을 생성해보세요! 🎵';
+    updateGenerateDisabled(); // 버튼 상태 업데이트 추가
   }
 
   // 초기 사용량 확인
@@ -498,8 +499,10 @@ async function main() {
       // 플레이어에 음악 로드
       musicPlayer.loadAudio(data.audio_base64, data.mime || 'audio/wav', trackTitle);
       
-      status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨`;
+      status.textContent = `음악이 준�되었습니다! 🎵 재생해보세요 ✨`;
       
+      // 버튼 상태 업데이트
+      updateGenerateDisabled();
     } catch (e) {
       status.textContent = '실패: ' + (e.message || e);
     } finally {
