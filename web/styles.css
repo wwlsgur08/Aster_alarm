@@ -157,6 +157,13 @@ body {
   backdrop-filter: blur(10px);
 }
 
+.download-icon-img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(100%);
+}
+
 .play-btn:hover:not(:disabled), .download-btn:hover:not(:disabled) {
   background: rgba(251, 191, 36, 0.3);
   border-color: var(--accent-purple);
@@ -167,6 +174,10 @@ body {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+.download-btn:disabled .download-icon-img {
+  opacity: 0.7;
 }
 
 .play-btn.playing {
