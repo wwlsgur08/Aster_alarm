@@ -286,7 +286,10 @@ async function main() {
 
   // Defaults - use relative path for Vercel deployment
   const defaultGenerate = '/api/generate';
-  if (apiEndpoint && !apiEndpoint.value) apiEndpoint.value = defaultGenerate;
+  if (apiEndpoint && !apiEndpoint.value) {
+    apiEndpoint.value = defaultGenerate;
+    console.log('API endpoint set to:', defaultGenerate);
+  }
 
   // Settings Modal (simplified - no need for Gemini API key input)
   const settingsToggle = document.getElementById('settings-toggle');
