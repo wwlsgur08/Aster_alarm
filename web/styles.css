@@ -712,8 +712,8 @@ body {
 }
 
 .picker-category {
-  border: 1px solid rgba(147, 112, 219, 0.3);
-  background: rgba(147, 112, 219, 0.1);
+  border: 2px solid var(--accent-yellow);
+  background: rgba(251, 191, 36, 0.1);
   padding: 12px;
   border-radius: 8px;
   cursor: pointer;
@@ -731,12 +731,9 @@ body {
   font-weight: 600;
   font-size: 0.95rem;
   color: var(--text-primary);
-  margin-bottom: 4px;
-}
-
-.picker-category .note {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  margin-bottom: 0;
+  white-space: pre-line;
+  line-height: 1.3;
 }
 
 .picker-charms {
