@@ -112,10 +112,8 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    // Usage endpoint
-    const clientIP = getClientIP(req);
-    const { remaining, used } = checkIPLimit(clientIP);
-    return res.json({ remaining, used, maxUses: MAX_USES_PER_IP });
+    // 사용량 체크 제거 - 항상 무제한 반환
+    return res.json({ remaining: 999, used: 0, maxUses: 999 });
   }
 
   if (req.method !== 'POST') {
@@ -126,27 +124,11 @@ export default async function handler(req, res) {
     const clientIP = getClientIP(req);
     console.log(`Generation request from IP: ${clientIP}`);
     
-    // Check IP limit
-    const { allowed, remaining, used } = checkIPLimit(clientIP);
-    if (!allowed) {
-      return res.status(429).json({ 
-        error: '1인당 2회로 제한됩니다. 한도를 모두 사용하셨습니다.',
-        remaining: 0,
-        used: MAX_USES_PER_IP
-      });
-    }
+    // IP 제한 체크 제거
 
     // Hardcoded API keys (temporary solution)
     const STABILITY_API_KEY = process.env.STABILITY_API_KEY || "sk-noCZyYl1klvcaeOQaQhiLI9R8HH7tNQGnrIGH3FqUiTnnI2x";
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyDummklvhgY_4KZn0z-9ndsI0hyvfL1aR4";
-    
-    // Debug logging (remove in production)
-    console.log('Environment check:', {
-      hasStabilityKey: !!STABILITY_API_KEY,
-      hasGeminiKey: !!GEMINI_API_KEY,
-      stabilityKeyLength: STABILITY_API_KEY ? STABILITY_API_KEY.length : 0,
-      geminiKeyLength: GEMINI_API_KEY ? GEMINI_API_KEY.length : 0
-    });
     
     if (!STABILITY_API_KEY) {
       throw new Error('STABILITY_API_KEY not configured in environment variables');
@@ -207,21 +189,15 @@ export default async function handler(req, res) {
     const audio_base64 = Buffer.from(arrayBuffer).toString('base64');
     const mime = response.headers.get('content-type') || 'audio/mp3';
     
-    // Success - increment usage
-    incrementIPUsage(clientIP);
-    
-    // Get updated usage after increment
-    const { remaining: newRemaining, used: newUsed } = checkIPLimit(clientIP);
-    
-    console.log(`Generation successful for IP ${clientIP}. Used: ${newUsed}/${MAX_USES_PER_IP}, Remaining: ${newRemaining}`);
+    console.log(`Generation successful for IP ${clientIP}. No limits applied.`);
     
     res.json({ 
       audio_base64, 
       mime,
       spec,
       prompt,
-      remaining: newRemaining,
-      used: newUsed
+      remaining: 999,
+      used: 0
     });
 
   } catch (err) {

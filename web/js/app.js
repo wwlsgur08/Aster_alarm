@@ -335,21 +335,9 @@ async function main() {
     return { remaining: 2, used: 0, maxUses: 2 }; // fallback도 2로 설정
   }
 
-  // 사용량 표시 업데이트
+  // 사용량 표시 업데이트 (항상 무제한 표시)
   async function updateUsageDisplay() {
-    try {
-      const usage = await checkUsage();
-      const usageInfo = `1인당 2회로 제한됩니다 (${usage.used || 0}/${usage.maxUses || 2})`;
-      if (status.textContent === '' || status.textContent.includes('제한됩니다')) {
-        status.textContent = usageInfo;
-      }
-      // 버튼 비활성화 로직을 updateGenerateDisabled로 통합
-      updateGenerateDisabled(usage);
-    } catch (e) {
-      console.log('Usage display update failed:', e);
-      // 오류 시에도 기본 로직 실행
-      updateGenerateDisabled();
-    }
+    status.textContent = '매력을 선택하고 음악을 생성해보세요! 🎵';
   }
 
   // 초기 사용량 확인
@@ -461,11 +449,10 @@ async function main() {
     traitsJson.value = JSON.stringify(payload, null, 2);
   });
 
-  function updateGenerateDisabled(usage = null) {
+  function updateGenerateDisabled() {
     const hasGen = Boolean((apiEndpoint?.value || '').trim());
     const hasTraits = rows.map(r => r.get()).filter(t => t.charm_name).length > 0;
-    const hasUsageLeft = usage ? usage.remaining > 0 : true; // usage가 없으면 기본적으로 허용
-    generateBtn.disabled = !(hasGen && hasTraits && hasUsageLeft);
+    generateBtn.disabled = !(hasGen && hasTraits);
   }
   
   apiEndpoint?.addEventListener('input', updateGenerateDisabled);
@@ -511,18 +498,10 @@ async function main() {
       // 플레이어에 음악 로드
       musicPlayer.loadAudio(data.audio_base64, data.mime || 'audio/wav', trackTitle);
       
-      const remainingInfo = data.used !== undefined ? 
-        ` (${data.used}/${data.maxUses || 2} 사용)` : '';
-      status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨${remainingInfo}`;
+      status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨`;
       
-      // 사용량 업데이트
-      await updateUsageDisplay();
     } catch (e) {
-      if (e.message.includes('429') || e.message.includes('한도') || e.message.includes('제한')) {
-        status.textContent = '1인당 2회로 제한됩니다. 한도를 모두 사용하셨습니다.';
-      } else {
-        status.textContent = '실패: ' + (e.message || e);
-      }
+      status.textContent = '실패: ' + (e.message || e);
     } finally {
       // UI 복원
       generateBtn.classList.remove('generating');
