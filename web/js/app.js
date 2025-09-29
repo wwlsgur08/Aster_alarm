@@ -409,13 +409,16 @@ async function main() {
     }, openPicker);
     rows.push({ row, get, set });
     traitsContainer.appendChild(row);
-    if (!pref) openPicker((chosenName) => { 
-      try { 
-        set({ charm_name: chosenName, stage: '5' }); 
-        updateGenerateDisabled();
-        updateUsageDisplay();
-      } catch {} 
-    });
+    // 자동으로 모달 열기 제거 - 사용자가 직접 클릭해야 함
+    if (!pref && false) { // 조건을 false로 만들어서 자동 실행 방지
+      openPicker((chosenName) => { 
+        try { 
+          set({ charm_name: chosenName, stage: '5' }); 
+          updateGenerateDisabled();
+          updateUsageDisplay();
+        } catch {} 
+      });
+    }
   }
   function clearRows() { 
     rows.splice(0, rows.length); 
@@ -510,7 +513,7 @@ async function main() {
     }
   });
 
-  // Seed with four empty rows by default (초기 매력 4개)
+  // 초기 매력 4개 추가 (모달 자동 실행 안함)
   addRow({ charm_name: '', stage: '' });
   addRow({ charm_name: '', stage: '' });
   addRow({ charm_name: '', stage: '' });
