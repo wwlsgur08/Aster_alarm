@@ -1,5 +1,7 @@
-// Simple usage check endpoint
-const ipUsage = new Map();
+// Simple usage check endpoint - shared global state
+let ipUsage = global.ipUsage || new Map();
+global.ipUsage = ipUsage;
+
 const MAX_USES_PER_IP = 2;
 const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -16,7 +18,7 @@ function checkIPLimit(ip) {
   
   if (!usage) {
     ipUsage.set(ip, { count: 0, lastReset: now });
-    return { allowed: true, remaining: MAX_USES_PER_IP };
+    return { allowed: true, remaining: MAX_USES_PER_IP, used: 0 };
   }
   
   // Reset if 24 hours have passed
@@ -26,7 +28,8 @@ function checkIPLimit(ip) {
   }
   
   const remaining = MAX_USES_PER_IP - usage.count;
-  return { allowed: remaining > 0, remaining };
+  const used = usage.count;
+  return { allowed: remaining > 0, remaining, used };
 }
 
 export default async function handler(req, res) {
@@ -44,7 +47,7 @@ export default async function handler(req, res) {
   }
 
   const clientIP = getClientIP(req);
-  const { remaining } = checkIPLimit(clientIP);
+  const { remaining, used } = checkIPLimit(clientIP);
   
-  res.json({ remaining, maxUses: MAX_USES_PER_IP });
+  res.json({ remaining, used, maxUses: MAX_USES_PER_IP });
 }

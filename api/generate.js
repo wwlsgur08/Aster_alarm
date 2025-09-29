@@ -1,5 +1,7 @@
-// IP usage tracking (in-memory, resets on cold starts)
-const ipUsage = new Map();
+// IP usage tracking (global Map to persist across function calls)
+let ipUsage = global.ipUsage || new Map();
+global.ipUsage = ipUsage;
+
 const MAX_USES_PER_IP = 2;
 const RESET_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -16,7 +18,7 @@ function checkIPLimit(ip) {
   
   if (!usage) {
     ipUsage.set(ip, { count: 0, lastReset: now });
-    return { allowed: true, remaining: MAX_USES_PER_IP };
+    return { allowed: true, remaining: MAX_USES_PER_IP, used: 0 };
   }
   
   // Reset if 24 hours have passed
@@ -26,14 +28,19 @@ function checkIPLimit(ip) {
   }
   
   const remaining = MAX_USES_PER_IP - usage.count;
-  return { allowed: remaining > 0, remaining };
+  const used = usage.count;
+  return { allowed: remaining > 0, remaining, used };
 }
 
 function incrementIPUsage(ip) {
   const usage = ipUsage.get(ip);
   if (usage) {
-    usage.count++;
+    usage.count = Math.min(usage.count + 1, MAX_USES_PER_IP);
+  } else {
+    // If for some reason usage doesn't exist, create it
+    ipUsage.set(ip, { count: 1, lastReset: new Date() });
   }
+  console.log(`IP ${ip} usage incremented. New count: ${usage ? usage.count : 1}`);
 }
 
 // Simple composition logic
@@ -59,7 +66,7 @@ function fillTemplate(spec) {
 }
 
 async function optimizePromptViaGemini(spec, prompt) {
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyDummklvhgY_4KZn0z-9ndsI0hyvfL1aR4";
   if (!GEMINI_API_KEY) {
     console.warn('GEMINI_API_KEY not set, skipping optimization');
     return prompt;
@@ -115,8 +122,8 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     // Usage endpoint
     const clientIP = getClientIP(req);
-    const { remaining } = checkIPLimit(clientIP);
-    return res.json({ remaining, maxUses: MAX_USES_PER_IP });
+    const { remaining, used } = checkIPLimit(clientIP);
+    return res.json({ remaining, used, maxUses: MAX_USES_PER_IP });
   }
 
   if (req.method !== 'POST') {
@@ -128,16 +135,18 @@ export default async function handler(req, res) {
     console.log(`Generation request from IP: ${clientIP}`);
     
     // Check IP limit
-    const { allowed, remaining } = checkIPLimit(clientIP);
+    const { allowed, remaining, used } = checkIPLimit(clientIP);
     if (!allowed) {
       return res.status(429).json({ 
-        error: '일일 생성 한도를 초과했습니다. 24시간 후 다시 시도해주세요.',
-        remaining: 0
+        error: '1인당 2회까지 생성할 수 있습니다. 24시간 후 다시 시도해주세요.',
+        remaining: 0,
+        used: MAX_USES_PER_IP
       });
     }
 
-    const STABILITY_API_KEY = process.env.STABILITY_API_KEY;
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    // Hardcoded API keys (temporary solution)
+    const STABILITY_API_KEY = process.env.STABILITY_API_KEY || "sk-noCZyYl1klvcaeOQaQhiLI9R8HH7tNQGnrIGH3FqUiTnnI2x";
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyDummklvhgY_4KZn0z-9ndsI0hyvfL1aR4";
     
     // Debug logging (remove in production)
     console.log('Environment check:', {
@@ -208,16 +217,19 @@ export default async function handler(req, res) {
     
     // Success - increment usage
     incrementIPUsage(clientIP);
-    const newRemaining = remaining - 1;
     
-    console.log(`Generation successful for IP ${clientIP}. Remaining: ${newRemaining}`);
+    // Get updated usage after increment
+    const { remaining: newRemaining, used: newUsed } = checkIPLimit(clientIP);
+    
+    console.log(`Generation successful for IP ${clientIP}. Used: ${newUsed}/${MAX_USES_PER_IP}, Remaining: ${newRemaining}`);
     
     res.json({ 
       audio_base64, 
       mime,
       spec,
       prompt,
-      remaining: newRemaining
+      remaining: newRemaining,
+      used: newUsed
     });
 
   } catch (err) {

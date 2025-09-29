@@ -339,11 +339,11 @@ async function main() {
   async function updateUsageDisplay() {
     try {
       const usage = await checkUsage();
-      const usageInfo = `오늘 남은 생성 횟수: ${usage.remaining}/${usage.maxUses || 2}`;
-      if (status.textContent === '' || status.textContent.includes('남은 생성 횟수')) {
+      const usageInfo = `1인당 2회까지 생성할 수 있습니다 (${usage.used || 0}/${usage.maxUses || 2})`;
+      if (status.textContent === '' || status.textContent.includes('생성할 수 있습니다')) {
         status.textContent = usageInfo;
       }
-      generateBtn.disabled = usage.remaining <= 0 || rows.map(r => r.get()).filter(t => t.charm_name).length === 0;
+      generateBtn.disabled = (usage.remaining || 0) <= 0 || rows.map(r => r.get()).filter(t => t.charm_name).length === 0;
     } catch (e) {
       console.log('Usage display update failed:', e);
     }
@@ -489,15 +489,15 @@ async function main() {
       // 플레이어에 음악 로드
       musicPlayer.loadAudio(data.audio_base64, data.mime || 'audio/wav', trackTitle);
       
-      const remainingInfo = data.remaining !== undefined ? 
-        ` (오늘 남은 생성 횟수: ${data.remaining})` : '';
+      const remainingInfo = data.used !== undefined ? 
+        ` (${data.used}/${data.maxUses || 2} 사용)` : '';
       status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨${remainingInfo}`;
       
       // 사용량 업데이트
       await updateUsageDisplay();
     } catch (e) {
-      if (e.message.includes('429') || e.message.includes('한도')) {
-        status.textContent = '일일 생성 한도를 초과했습니다. 24시간 후 다시 시도해주세요.';
+      if (e.message.includes('429') || e.message.includes('한도') || e.message.includes('1인당')) {
+        status.textContent = '1인당 2회까지 생성할 수 있습니다. 24시간 후 다시 시도해주세요.';
       } else {
         status.textContent = '실패: ' + (e.message || e);
       }
