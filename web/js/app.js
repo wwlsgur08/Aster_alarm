@@ -343,9 +343,12 @@ async function main() {
       if (status.textContent === '' || status.textContent.includes('제한됩니다')) {
         status.textContent = usageInfo;
       }
-      generateBtn.disabled = (usage.remaining || 0) <= 0 || rows.map(r => r.get()).filter(t => t.charm_name).length === 0;
+      // 버튼 비활성화 로직을 updateGenerateDisabled로 통합
+      updateGenerateDisabled(usage);
     } catch (e) {
       console.log('Usage display update failed:', e);
+      // 오류 시에도 기본 로직 실행
+      updateGenerateDisabled();
     }
   }
 
@@ -458,10 +461,11 @@ async function main() {
     traitsJson.value = JSON.stringify(payload, null, 2);
   });
 
-  function updateGenerateDisabled() {
+  function updateGenerateDisabled(usage = null) {
     const hasGen = Boolean((apiEndpoint?.value || '').trim());
     const hasTraits = rows.map(r => r.get()).filter(t => t.charm_name).length > 0;
-    generateBtn.disabled = !(hasGen && hasTraits);
+    const hasUsageLeft = usage ? usage.remaining > 0 : true; // usage가 없으면 기본적으로 허용
+    generateBtn.disabled = !(hasGen && hasTraits && hasUsageLeft);
   }
   
   apiEndpoint?.addEventListener('input', updateGenerateDisabled);
