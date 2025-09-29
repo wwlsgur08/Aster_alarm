@@ -453,6 +453,16 @@ async function main() {
   function updateGenerateDisabled() {
     const hasGen = Boolean((apiEndpoint?.value || '').trim());
     const hasTraits = rows.map(r => r.get()).filter(t => t.charm_name).length > 0;
+    
+    // 디버깅용 로그
+    console.log('updateGenerateDisabled:', {
+      hasGen,
+      hasTraits,
+      apiEndpoint: apiEndpoint?.value,
+      traits: rows.map(r => r.get()),
+      disabled: !(hasGen && hasTraits)
+    });
+    
     generateBtn.disabled = !(hasGen && hasTraits);
   }
   
