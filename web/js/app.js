@@ -322,7 +322,7 @@ async function main() {
   async function checkUsage() {
     try {
       const generateUrl = (apiEndpoint?.value || '').trim();
-      if (!generateUrl) return { remaining: 0 };
+      if (!generateUrl) return { remaining: 2, used: 0, maxUses: 2 }; // 기본값을 2로 설정
       
       const usageUrl = generateUrl.replace('/generate', '/usage');
       const res = await fetch(usageUrl);
@@ -332,7 +332,7 @@ async function main() {
     } catch (e) {
       console.log('Usage check failed:', e);
     }
-    return { remaining: 2, maxUses: 2 }; // fallback
+    return { remaining: 2, used: 0, maxUses: 2 }; // fallback도 2로 설정
   }
 
   // 사용량 표시 업데이트
