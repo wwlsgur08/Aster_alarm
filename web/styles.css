@@ -1,15 +1,32 @@
 /* 기본 변수 */
 :root {
-  --bg-primary: #0a192f;
-  --bg-secondary: #0f1b2e;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --text-muted: rgba(255, 255, 255, 0.5);
-  --accent-yellow: #fbbf24;
-  --accent-purple: #9370db;
-  --accent-blue: #3b82f6;
-  --border-color: rgba(251, 191, 36, 0.3);
-  --shadow-purple: rgba(147, 112, 219, 0.3);
+  --bg-slate-900: #0f172a;
+  --bg-blue-900: #1e3a8a;
+  --bg-indigo-900: #312e81;
+  --bg-slate-800-60: rgba(30, 41, 59, 0.6);
+  --bg-blue-900-60: rgba(30, 58, 138, 0.6);
+  
+  --text-slate-300: #cbd5e1;
+  --text-cyan-300: #67e8f9;
+  --text-white: #ffffff;
+  --text-indigo-900: #312e81;
+
+  --accent-cyan-400: #22d3ee;
+  --accent-teal-500: #14b8a6;
+
+  --border-cyan-400-30: rgba(34, 211, 238, 0.3);
+  --shadow-cyan-400-10: rgba(34, 211, 238, 0.1);
+  
+  /* Legacy variables for transition */
+  --bg-primary: #0f172a; /* Replaced with gradient */
+  --text-primary: var(--text-slate-300);
+  --text-secondary: rgba(203, 213, 225, 0.7);
+  --text-muted: rgba(203, 213, 225, 0.5);
+  --accent-yellow: var(--accent-cyan-400); /* Mapped to cyan */
+  --accent-purple: var(--accent-teal-500); /* Mapped to teal */
+  --accent-blue: #3b82f6; /* Kept for now */
+  --border-color: var(--border-cyan-400-30);
+  --shadow-purple: var(--shadow-cyan-400-10);
 }
 
 /* 기본 스타일 */
@@ -21,7 +38,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Noto Sans KR', sans-serif;
-  background: var(--bg-primary);
+  background: linear-gradient(to bottom, var(--bg-slate-900), var(--bg-blue-900), var(--bg-indigo-900));
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
