@@ -341,11 +341,13 @@ async function main() {
   // 사용량 표시 업데이트 (항상 무제한 표시)
   async function updateUsageDisplay() {
     status.textContent = '매력을 선택하고 음악을 생성해보세요! 🎵';
-    updateGenerateDisabled(); // 버튼 상태 업데이트 추가
+    // rows 배열이 초기화된 후에만 호출
+    if (typeof rows !== 'undefined') {
+      updateGenerateDisabled();
+    }
   }
 
-  // 초기 사용량 확인
-  updateUsageDisplay();
+  // 초기 사용량 확인 - rows 배열 초기화 후로 이동
 
   // Picker modal
   const picker = document.getElementById('picker');
@@ -436,6 +438,9 @@ async function main() {
     updateGenerateDisabled();
     updateUsageDisplay();
   }
+
+  // rows 배열 초기화 후에 초기 상태 업데이트
+  updateUsageDisplay();
 
   addBtn.addEventListener('click', () => addRow());
   clearBtn.addEventListener('click', () => clearRows());
