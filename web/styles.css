@@ -713,7 +713,7 @@ body {
 
 .picker-category {
   border: 2px solid var(--accent-yellow);
-  background: rgba(251, 191, 36, 0.1);
+  background: transparent;
   padding: 12px;
   border-radius: 8px;
   cursor: pointer;

@@ -392,24 +392,18 @@ async function main() {
     // 카테고리명 띄어쓰기 및 줄바꿈 처리
     let categoryName = cat.category_name;
     if (categoryName.includes('및')) {
-      categoryName = categoryName.replace('및', '및\n');
+      categoryName = categoryName.replace('및', ' 및\n');
     }
     // 띄어쓰기 추가
     categoryName = categoryName
       .replace('정서적안정', '정서적 안정')
       .replace('자기인식', '자기 인식')
-      .replace('성실성', '성실성')
-      .replace('책임감', '책임감')
-      .replace('이해심', '이해심')
-      .replace('공감능력', '공감 능력')
-      .replace('유머감각', '유머 감각')
-      .replace('사교성', '사교성')
-      .replace('도덕성', '도덕성')
-      .replace('양심', '양심')
-      .replace('지적호기심', '지적 호기심')
-      .replace('개방성', '개방성')
-      .replace('목표지향성', '목표 지향성')
-      .replace('야망', '야망');
+      .replace('성실성및책임감', '성실성 및\n책임감')
+      .replace('이해심및공감능력', '이해심 및\n공감 능력')
+      .replace('유머감각및사교성', '유머 감각 및\n사교성')
+      .replace('도덕성및양심', '도덕성 및\n양심')
+      .replace('지적호기심및개방성', '지적 호기심 및\n개방성')
+      .replace('목표지향성및야망', '목표 지향성 및\n야망');
 
     const item = el('div', { class: 'picker-category' }, [
       el('div', { class: 'title', text: categoryName })
