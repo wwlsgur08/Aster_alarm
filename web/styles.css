@@ -80,8 +80,8 @@ body {
 }
 
 .logo {
-  width: 96px;
-  height: 96px;
+  width: 120px;
+  height: 120px;
   border: 2px solid var(--accent-yellow);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
@@ -89,10 +89,13 @@ body {
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(10px);
+  overflow: hidden;
 }
 
-.logo-inner {
-  font-size: 48px;
+.logo-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
   filter: drop-shadow(0 0 10px var(--accent-yellow));
 }
 
@@ -795,6 +798,16 @@ body {
     font-size: 1.6rem;
   }
   
+  .logo {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .logo-image {
+    width: 70px;
+    height: 70px;
+  }
+  
   .music-player {
     padding: 16px;
   }
@@ -870,6 +883,16 @@ body {
   
   .main-container {
     padding: 16px 12px;
+  }
+  
+  .logo {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .logo-image {
+    width: 60px;
+    height: 60px;
   }
   
   .charm-row {
