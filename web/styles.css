@@ -275,7 +275,7 @@ body {
 }
 
 .cd-image.spinning {
-  animation: spin-cd 2s linear infinite;
+  animation: spin-cd 3s linear infinite;
 }
 
 @keyframes spin-cd {
