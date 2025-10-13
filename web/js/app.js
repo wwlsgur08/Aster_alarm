@@ -101,6 +101,7 @@ function initMusicPlayer() {
   const trackTitle = document.getElementById('track-title');
   const trackSubtitle = document.getElementById('track-subtitle');
   const playIcon = playBtn.querySelector('.play-icon');
+  const cdImage = document.getElementById('cd-image');
   
   let audioData = null;
   let fileName = 'aster_alarm.wav';
@@ -135,10 +136,12 @@ function initMusicPlayer() {
       audio.play();
       playIcon.textContent = '⏸';
       playBtn.classList.add('playing');
+      cdImage.classList.add('spinning');
     } else {
       audio.pause();
       playIcon.textContent = '▶';
       playBtn.classList.remove('playing');
+      cdImage.classList.remove('spinning');
     }
   }
   
@@ -181,6 +184,7 @@ function initMusicPlayer() {
   audio.addEventListener('ended', () => {
     playIcon.textContent = '▶';
     playBtn.classList.remove('playing');
+    cdImage.classList.remove('spinning');
     progressFill.style.width = '0%';
     audio.currentTime = 0;
   });
@@ -189,6 +193,7 @@ function initMusicPlayer() {
     trackTitle.textContent = '🎵 오디오 로드 오류';
     trackSubtitle.textContent = '음악을 재생할 수 없습니다';
     playBtn.disabled = true;
+    cdImage.classList.remove('spinning');
   });
   
   return { loadAudio };

@@ -167,6 +167,30 @@ body {
   color: var(--text-secondary);
 }
 
+/* CD 이미지 스타일 */
+.cd-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.cd-image {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.cd-image.spinning {
+  animation: spin-cd 2s linear infinite;
+}
+
+@keyframes spin-cd {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .player-controls {
   display: flex;
   justify-content: center;
