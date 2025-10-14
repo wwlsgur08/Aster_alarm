@@ -263,6 +263,23 @@ async function main() {
   // 음악 플레이어 초기화
   const musicPlayer = initMusicPlayer();
 
+  // 스크롤 인디케이터 자동 숨김
+  const scrollIndicator = document.querySelector('.scroll-indicator');
+  let hasScrolled = false;
+  
+  window.addEventListener('scroll', () => {
+    if (!hasScrolled && window.scrollY > 50) {
+      hasScrolled = true;
+      if (scrollIndicator) {
+        scrollIndicator.style.opacity = '0';
+        scrollIndicator.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          scrollIndicator.style.display = 'none';
+        }, 500);
+      }
+    }
+  });
+
   const traitsContainer = document.getElementById('traits-container');
   const addBtn = document.getElementById('add-trait');
   const clearBtn = document.getElementById('clear-traits');

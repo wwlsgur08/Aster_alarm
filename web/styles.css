@@ -370,6 +370,44 @@ body {
   display: none;
 }
 
+/* 스크롤 안내 */
+.scroll-indicator {
+  text-align: center;
+  margin: 16px 0 24px 0;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+.scroll-text {
+  font-size: 0.9rem;
+  color: var(--text-cyan-300);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.scroll-arrow {
+  font-size: 1.5rem;
+  color: var(--accent-cyan-400);
+  animation: arrow-bounce 1.5s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes arrow-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+}
+
 /* 입력 라벨 */
 .input-label {
   display: block;
@@ -963,6 +1001,41 @@ body {
   
   .track-subtitle {
     font-size: 0.8rem;
+  }
+  
+  /* 모바일에서 CD 플레이어 크기 조정 */
+  .cd-container {
+    width: 240px;
+    height: 220px;
+  }
+  
+  .cd-container::after {
+    width: 200px;
+    height: 200px;
+    left: 8px;
+    top: 10px;
+  }
+  
+  .cd-image {
+    width: 190px;
+    height: 190px;
+    left: 13px;
+    top: 15px;
+  }
+  
+  .cd-player-buttons {
+    right: 15px;
+    gap: 10px;
+  }
+  
+  .cd-player-button {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .cd-player-button::after {
+    width: 5px;
+    height: 5px;
   }
   
   .player-controls {
