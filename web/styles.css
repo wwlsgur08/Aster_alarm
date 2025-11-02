@@ -706,10 +706,6 @@ body {
   transform: none;
 }
 
-.send-3d-btn.hidden {
-  display: none;
-}
-
 .send-3d-btn .star-icon {
   font-size: 1.3rem;
 }

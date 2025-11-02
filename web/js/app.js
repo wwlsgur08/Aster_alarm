@@ -570,10 +570,9 @@ async function main() {
       timestamp: new Date().toISOString()
     };
     
-    // 3D 버튼 활성화
+    // 3D 버튼 활성화 (hidden 클래스는 제거하지 않음 - 항상 보임)
     const send3DBtn = document.getElementById('send-to-3d');
     if (send3DBtn) {
-      send3DBtn.classList.remove('hidden');
       send3DBtn.disabled = false;
     }
   }
