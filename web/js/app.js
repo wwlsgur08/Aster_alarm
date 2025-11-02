@@ -562,49 +562,45 @@ async function main() {
   function checkImportData() {
     // URL에서 import 파라미터 확인
     const urlParams = new URLSearchParams(window.location.search);
-    const shouldImport = urlParams.get('import');
+    const importParam = urlParams.get('import');
     
-    if (shouldImport === 'true') {
-      // localStorage에서 임포트 데이터 확인
-      const importData = localStorage.getItem('asterAlarmImport');
-      
-      if (importData) {
-        try {
-          const data = JSON.parse(importData);
-          console.log('🎵 매력카드 데이터 임포트:', data);
-          
-          // 기존 행 제거
-          clearRows();
-          
-          // 사용자 이름 설정
-          if (data.userName) {
-            const userNameInput = document.getElementById('user-name');
-            if (userNameInput) {
-              userNameInput.value = data.userName;
-            }
+    if (importParam) {
+      try {
+        // Base64 디코딩
+        const decodedData = decodeURIComponent(atob(importParam));
+        const data = JSON.parse(decodedData);
+        
+        console.log('🎵 매력카드 데이터 임포트:', data);
+        
+        // 기존 행 제거
+        clearRows();
+        
+        // 사용자 이름 설정
+        if (data.userName) {
+          const userNameInput = document.getElementById('user-name');
+          if (userNameInput) {
+            userNameInput.value = data.userName;
           }
-          
-          // 매력 데이터 추가
-          if (data.charms && Array.isArray(data.charms)) {
-            data.charms.forEach(charm => {
-              addRow({
-                charm_name: charm.charm_name,
-                stage: charm.stage
-              });
-            });
-            
-            // 알림 표시
-            status.textContent = `✨ ${data.userName}님의 매력 ${data.charms.length}개를 불러왔습니다! 음악을 생성해보세요 🎵`;
-            
-            // localStorage 데이터 삭제 (한 번만 임포트)
-            localStorage.removeItem('asterAlarmImport');
-            
-            // URL 파라미터 제거
-            window.history.replaceState({}, document.title, window.location.pathname);
-          }
-        } catch (error) {
-          console.error('❌ 임포트 데이터 처리 오류:', error);
         }
+        
+        // 매력 데이터 추가
+        if (data.charms && Array.isArray(data.charms)) {
+          data.charms.forEach(charm => {
+            addRow({
+              charm_name: charm.charm_name,
+              stage: charm.stage
+            });
+          });
+          
+          // 알림 표시
+          status.textContent = `✨ ${data.userName}님의 매력 ${data.charms.length}개를 불러왔습니다! 음악을 생성해보세요 🎵`;
+          
+          // URL 파라미터 제거
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (error) {
+        console.error('❌ 임포트 데이터 처리 오류:', error);
+        // 에러가 있어도 계속 진행
       }
     }
   }
@@ -612,9 +608,9 @@ async function main() {
   // 초기 매력 4개 추가 (모달 자동 실행 안함)
   // 단, import 데이터가 있으면 이 부분은 건너뜀
   const urlParams = new URLSearchParams(window.location.search);
-  const shouldImport = urlParams.get('import');
+  const hasImport = urlParams.get('import');
   
-  if (shouldImport !== 'true') {
+  if (!hasImport) {
     addRow({ charm_name: '', stage: '' });
     addRow({ charm_name: '', stage: '' });
     addRow({ charm_name: '', stage: '' });
