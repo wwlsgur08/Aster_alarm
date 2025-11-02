@@ -119,6 +119,12 @@
         <div class="loading-spinner hidden"></div>
       </button>
 
+      <!-- 3D 별자리 추가 버튼 -->
+      <button id="send-to-3d" type="button" class="send-3d-btn hidden" disabled>
+        <span class="star-icon">✨</span>
+        <span class="btn-text">3D 별자리에 추가</span>
+      </button>
+
       <!-- 상태 표시 -->
       <div id="gen-status" class="status-display"></div>
 
@@ -186,6 +192,31 @@
     <footer class="footer">
       <small>© Aster Alarm</small>
     </footer>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script>
+      // Firebase 설정
+      const firebaseConfig = {
+        apiKey: "AIzaSyBcl4tKzcneq6yn6mmADC5YzoVGmRnsZbk",
+        authDomain: "dinteraction-e0393.firebaseapp.com",
+        databaseURL: "https://dinteraction-e0393-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "dinteraction-e0393",
+        storageBucket: "dinteraction-e0393.firebasestorage.app",
+        messagingSenderId: "845988355289",
+        appId: "1:845988355289:web:b5243b16e80bfb9cbf32c8",
+        measurementId: "G-QG1QWM3LSC"
+      };
+      
+      // Firebase 초기화
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+      console.log('🔥 Firebase 초기화 완료');
+      
+      // 전역으로 노출 (app.js에서 사용)
+      window.firebaseDatabase = database;
+    </script>
 
     <script type="module" src="./js/app.js"></script>
   </body>

@@ -672,6 +672,48 @@ body {
   100% { transform: rotate(360deg); }
 }
 
+/* 3D 별자리 추가 버튼 */
+.send-3d-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(to right, #a855f7, #ec4899);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.send-3d-btn:hover:not(:disabled) {
+  background: linear-gradient(to right, #9333ea, #db2777);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.5);
+}
+
+.send-3d-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.send-3d-btn.hidden {
+  display: none;
+}
+
+.send-3d-btn .star-icon {
+  font-size: 1.3rem;
+}
+
 /* 상태 표시 */
 .status-display {
   text-align: center;
