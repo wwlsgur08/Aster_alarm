@@ -546,7 +546,7 @@ async function main() {
       status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨`;
       
       // 🚀 플레이어에 음악 즉시 전송 (HTTP 직접 호출)
-      fetch('https://aster-music-player-default-rtdb.firebaseio.com/music-tracks.json', {
+      fetch('https://aster-music-player-default-rtdb.asia-southeast1.firebasedatabase.app/music-tracks.json', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
