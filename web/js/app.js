@@ -26,53 +26,88 @@ function clampStage(v) {
 
 function buildTraitRow(value = { charm_name: '', stage: '' }, onRemove, openPicker) {
   const row = el('div', { class: 'charm-row' });
-  
-  const charmBtn = el('button', { 
-    class: `charm-button ${!value.charm_name ? 'placeholder' : ''}`, 
-    type: 'button' 
+
+  const charmBtn = el('button', {
+    class: `charm-button ${!value.charm_name ? 'placeholder' : ''}`,
+    type: 'button'
   }, value.charm_name || '매력 선택');
-  
-  const stage = el('input', { 
-    class: `charm-stage ${!value.charm_name ? 'disabled' : ''}`,
-    type: 'number', 
-    placeholder: '1~6', 
-    value: value.stage ?? '', 
-    min: '1', 
-    max: '6', 
-    step: '1' 
+
+  // 1~6 단계 버튼 그룹
+  const stageContainer = el('div', {
+    class: `stage-buttons ${!value.charm_name ? 'disabled' : ''}`
   });
-  
-  const removeBtn = el('button', { 
-    class: 'remove-charm-btn', 
+
+  const stageButtons = [];
+  for (let i = 1; i <= 6; i++) {
+    const btn = el('button', {
+      type: 'button',
+      class: 'stage-btn',
+      'data-value': String(i)
+    }, String(i));
+    btn.addEventListener('click', () => {
+      if (stageContainer.classList.contains('disabled')) return;
+      stageButtons.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    stageButtons.push(btn);
+    stageContainer.appendChild(btn);
+  }
+
+  // 초기 선택 상태 적용
+  const initStage = clampStage(value.stage);
+  if (initStage) {
+    const target = stageButtons[initStage - 1];
+    target?.classList.add('selected');
+  }
+
+  const removeBtn = el('button', {
+    class: 'remove-charm-btn',
     type: 'button',
     title: '삭제'
   }, '×');
-  
+
   charmBtn.addEventListener('click', () => {
-    openPicker((chosenName) => { 
+    openPicker((chosenName) => {
       charmBtn.textContent = chosenName;
       charmBtn.classList.remove('placeholder');
-      stage.classList.remove('disabled');
-      if (!stage.value) stage.value = '5'; // 기본값 설정
+      stageContainer.classList.remove('disabled');
+      // 기본값: 선택 없으면 5단계 자동 선택
+      if (!stageButtons.some(b => b.classList.contains('selected'))) {
+        stageButtons.forEach(b => b.classList.remove('selected'));
+        stageButtons[4].classList.add('selected');
+      }
     });
   });
-  
+
   removeBtn.addEventListener('click', () => onRemove(row));
-  
-  row.append(charmBtn, stage, removeBtn);
-  
-  return { 
-    row, 
-    get: () => ({ 
-      charm_name: charmBtn.textContent === '매력 선택' ? '' : charmBtn.textContent.trim(), 
-      stage: clampStage(stage.value) 
-    }), 
-    set: (v) => { 
+
+  row.append(charmBtn, stageContainer, removeBtn);
+
+  const getSelectedStage = () => {
+    const sel = stageButtons.find(b => b.classList.contains('selected'));
+    const val = sel ? Number(sel.getAttribute('data-value')) : NaN;
+    return Number.isFinite(val) ? clampStage(val) : '';
+  };
+
+  const setSelectedStage = (v) => {
+    const n = clampStage(v);
+    stageButtons.forEach(b => b.classList.remove('selected'));
+    if (n) stageButtons[n - 1]?.classList.add('selected');
+  };
+
+  return {
+    row,
+    get: () => ({
+      charm_name: charmBtn.textContent === '매력 선택' ? '' : charmBtn.textContent.trim(),
+      stage: getSelectedStage()
+    }),
+    set: (v) => {
       charmBtn.textContent = v.charm_name || '매력 선택';
-      charmBtn.classList.toggle('placeholder', !v.charm_name);
-      stage.classList.toggle('disabled', !v.charm_name);
-      stage.value = v.stage ?? ''; 
-    } 
+      const hasCharm = Boolean(v.charm_name);
+      charmBtn.classList.toggle('placeholder', !hasCharm);
+      stageContainer.classList.toggle('disabled', !hasCharm);
+      setSelectedStage(v.stage ?? '');
+    }
   };
 }
 

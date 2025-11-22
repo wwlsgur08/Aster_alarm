@@ -539,30 +539,41 @@ body {
   color: var(--text-muted);
 }
 
-.charm-stage {
-  width: 70px;
-  padding: 8px 8px;
+/* 1~6 단계 버튼 그룹 */
+.stage-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.stage-buttons.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.stage-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   border: 2px solid var(--accent-yellow);
   border-radius: 8px;
   color: var(--text-primary);
-  text-align: center;
   font-size: 0.9rem;
-  transition: all 0.3s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.charm-stage:focus {
-  outline: none;
+.stage-btn:hover {
   border-color: var(--accent-purple);
-  box-shadow: 0 0 0 3px rgba(147, 112, 219, 0.2);
+  box-shadow: 0 0 0 3px rgba(147, 112, 219, 0.15);
 }
 
-.charm-stage::placeholder {
-  color: var(--text-muted);
-}
-
-.charm-stage.disabled {
-  opacity: 0.5;
+.stage-btn.selected {
+  background: var(--accent-yellow);
+  color: #0b1220; /* 대비 높은 어두운 텍스트 */
+  border-color: var(--accent-yellow);
 }
 
 .remove-charm-btn {
