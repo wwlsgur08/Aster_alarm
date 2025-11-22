@@ -543,7 +543,52 @@ async function main() {
       // 플레이어에 음악 로드
       musicPlayer.loadAudio(data.audio_base64, data.mime || 'audio/wav', trackTitle);
       
-      status.textContent = `음악이 준�되었습니다! 🎵 재생해보세요 ✨`;
+      // 🆕 Player Firebase에 음악 자동 추가
+      try {
+        // Player Firebase 설정 (Player 사이트와 동일)
+        const playerFirebaseConfig = {
+          apiKey: "AIzaSyCauC5NvMol_9fX0i2q7wI8zht1xKdS2v4",
+          authDomain: "aster-music-player.firebaseapp.com",
+          databaseURL: "https://aster-music-player-default-rtdb.firebaseio.com/",
+          projectId: "aster-music-player",
+          storageBucket: "aster-music-player.firebasestorage.app",
+          messagingSenderId: "764474066780",
+          appId: "1:764474066780:web:45430a3130f383aa8aa399"
+        };
+
+        // Player Firebase 앱 초기화 (별도 앱으로)
+        let playerApp;
+        try {
+          playerApp = firebase.app('player');
+        } catch {
+          playerApp = firebase.initializeApp(playerFirebaseConfig, 'player');
+        }
+        
+        const playerDatabase = playerApp.database();
+        
+        // 플레이어 형식으로 데이터 변환
+        const trackData = {
+          name: userName,
+          title: `${userName}의 매력 음악`,
+          artist: 'Aster AI',
+          duration: context.duration_seconds,
+          audioUrl: `data:${data.mime || 'audio/wav'};base64,${data.audio_base64}`,
+          charmTraits: constellation.traits,
+          createdAt: Date.now(),
+          source: 'aster-alarm'
+        };
+
+        // Player Firebase에 추가
+        const musicsRef = playerDatabase.ref('music-tracks');
+        await musicsRef.push(trackData);
+        
+        console.log('✅ 플레이어에 음악 추가 완료!');
+        status.textContent = `음악이 준비되었습니다! 🎵 플레이어에도 자동 추가됨 ✨`;
+        
+      } catch (playerError) {
+        console.error('❌ 플레이어 전송 실패:', playerError);
+        status.textContent = `음악이 준비되었습니다! 🎵 재생해보세요 ✨`;
+      }
       
       // 버튼 상태 업데이트
       updateGenerateDisabled();
