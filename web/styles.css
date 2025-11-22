@@ -539,7 +539,7 @@ body {
   color: var(--text-muted);
 }
 
-/* 1~6 단계 버튼 그룹 */
+/* 1~6 단계 버튼 그룹 (Glassmorphism) */
 .stage-buttons {
   display: flex;
   gap: 8px;
@@ -556,24 +556,28 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  border: 2px solid var(--accent-yellow);
-  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
   color: var(--text-primary);
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) inset;
 }
 
 .stage-btn:hover {
-  border-color: var(--accent-purple);
-  box-shadow: 0 0 0 3px rgba(147, 112, 219, 0.15);
+  border-color: var(--accent-cyan-400);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
 }
 
 .stage-btn.selected {
-  background: var(--accent-yellow);
-  color: #0b1220; /* 대비 높은 어두운 텍스트 */
-  border-color: var(--accent-yellow);
+  background: linear-gradient(to right, var(--accent-cyan-400), var(--accent-teal-500));
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(34, 211, 238, 0.25);
 }
 
 .remove-charm-btn {

@@ -71,11 +71,6 @@ function buildTraitRow(value = { charm_name: '', stage: '' }, onRemove, openPick
       charmBtn.textContent = chosenName;
       charmBtn.classList.remove('placeholder');
       stageContainer.classList.remove('disabled');
-      // 기본값: 선택 없으면 5단계 자동 선택
-      if (!stageButtons.some(b => b.classList.contains('selected'))) {
-        stageButtons.forEach(b => b.classList.remove('selected'));
-        stageButtons[4].classList.add('selected');
-      }
     });
   });
 
