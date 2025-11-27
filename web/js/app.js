@@ -613,112 +613,19 @@ async function main() {
     }
   });
 
-  // 음악 생성 성공 후 데이터 저장 및 3D 버튼 활성화
-  function onMusicGenerated(data, userName, constellation) {
-    // 생성된 음악 데이터를 전역에 저장 (3D 전송용)
-    window.generatedMusicData = {
-      audio_base64: data.audio_base64,
-      mime: data.mime || 'audio/wav',
-      trackTitle: `${userName} 매력 벨소리`,
-      userName: userName,
-      charms: constellation.traits,
-      timestamp: new Date().toISOString()
-    };
-    
-    // 3D 버튼 활성화 (hidden 클래스는 제거하지 않음 - 항상 보임)
-    const send3DBtn = document.getElementById('send-to-3d');
-    if (send3DBtn) {
-      send3DBtn.disabled = false;
-    }
-  }
 
-  // 3D 별자리에 추가 버튼
-  const send3DBtn = document.getElementById('send-to-3d');
-  if (send3DBtn) {
-    send3DBtn.addEventListener('click', async () => {
-      if (!window.generatedMusicData) {
-        alert('먼저 음악을 생성해주세요!');
-        return;
-      }
+
+  // 창닫기 버튼
+  const closeWindowBtn = document.getElementById('close-window');
+  if (closeWindowBtn) {
+    closeWindowBtn.addEventListener('click', () => {
+      // 현재 창/탭 닫기 시도
+      window.close();
       
-      const btn = send3DBtn;
-      const originalText = btn.querySelector('.btn-text').textContent;
-      btn.querySelector('.btn-text').textContent = '전송 중...';
-      btn.disabled = true;
-      
-      try {
-        const musicData = window.generatedMusicData;
-        const database = window.firebaseDatabase;
-        
-        if (!database) {
-          throw new Error('Firebase가 초기화되지 않았습니다.');
-        }
-        
-        console.log('🎵 Firebase에서 사용자 별자리 검색 중...', musicData.userName);
-        
-        // Firebase에서 해당 사용자의 별자리 찾기
-        const constellationsRef = database.ref('constellations');
-        const snapshot = await constellationsRef.once('value');
-        const allConstellations = snapshot.val();
-        
-        if (!allConstellations) {
-          alert(`❌ ${musicData.userName}님의 별자리를 찾을 수 없습니다.\n먼저 매력카드 앱에서 별자리를 만들어주세요!`);
-          btn.querySelector('.btn-text').textContent = originalText;
-          btn.disabled = false;
-          return;
-        }
-        
-        // 사용자 이름으로 별자리 찾기
-        let userConstellationKey = null;
-        let userConstellation = null;
-        
-        for (const [key, constellation] of Object.entries(allConstellations)) {
-          if (constellation.userName === musicData.userName) {
-            userConstellationKey = key;
-            userConstellation = constellation;
-            break;
-          }
-        }
-        
-        if (!userConstellationKey) {
-          alert(`❌ ${musicData.userName}님의 별자리를 찾을 수 없습니다.\n먼저 매력카드 앱에서 별자리를 만들어주세요!`);
-          btn.querySelector('.btn-text').textContent = originalText;
-          btn.disabled = false;
-          return;
-        }
-        
-        console.log('✨ 별자리 발견:', userConstellationKey, userConstellation);
-        
-        // 별자리에 벨소리 데이터 추가
-        const updateData = {
-          alarmMusic: {
-            audio_base64: musicData.audio_base64,
-            mime: musicData.mime,
-            trackTitle: musicData.trackTitle,
-            charms: musicData.charms,
-            addedAt: musicData.timestamp
-          }
-        };
-        
-        await database.ref(`constellations/${userConstellationKey}`).update(updateData);
-        
-        console.log('✅ 벨소리가 별자리에 추가되었습니다!');
-        
-        btn.querySelector('.btn-text').textContent = '전송 완료! ✨';
-        status.textContent = `✨ ${musicData.userName}님의 별자리에 벨소리가 추가되었습니다! 3D 우주에서 확인해보세요 🌟`;
-        
-        // 완료 후 버튼 상태 변경
-        setTimeout(() => {
-          btn.querySelector('.btn-text').textContent = '별자리에 추가됨 ✓';
-          btn.style.background = 'linear-gradient(to right, #10b981, #059669)';
-        }, 1500);
-        
-      } catch (error) {
-        console.error('❌ 3D 전송 오류:', error);
-        alert('별자리에 벨소리 추가 중 오류가 발생했습니다.\n' + error.message);
-        btn.querySelector('.btn-text').textContent = originalText;
-        btn.disabled = false;
-      }
+      // window.close()가 작동하지 않을 수 있으므로 안내 메시지 표시
+      setTimeout(() => {
+        status.textContent = '창을 수동으로 닫아주세요 (브라우저 설정에 따라 자동 닫기가 제한될 수 있습니다)';
+      }, 100);
     });
   }
 
