@@ -1235,6 +1235,201 @@ body {
   }
 
   .remove-charm-btn {
+  resize: vertical;
+}
+
+/* 푸터 */
+.footer {
+  text-align: center;
+  margin-top: auto;
+  padding: 16px;
+}
+
+.footer small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 1.6rem;
+  }
+
+  .logo-image {
+    width: 80px;
+    height: 80px;
+  }
+
+  .settings-btn {
+    top: 12px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .music-player {
+    padding: 16px;
+  }
+
+  .track-title {
+    font-size: 1rem;
+  }
+
+  .track-subtitle {
+    font-size: 0.8rem;
+  }
+
+  /* 모바일에서 CD 플레이어 크기 조정 */
+  .cd-container {
+    width: 240px;
+    height: 220px;
+  }
+
+  .cd-container::after {
+    width: 200px;
+    height: 200px;
+    left: 8px;
+    top: 10px;
+  }
+
+  .cd-image {
+    width: 190px;
+    height: 190px;
+    left: 13px;
+    top: 15px;
+  }
+
+  .cd-player-buttons {
+    right: 15px;
+    gap: 10px;
+  }
+
+  .cd-player-button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cd-player-button::after {
+    width: 5px;
+    height: 5px;
+  }
+
+  .player-controls {
+    gap: 12px;
+  }
+
+  .play-btn,
+  .download-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+  }
+
+  /* 모바일에서 매력 행을 한 줄로 유지 */
+  .charm-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .charm-button {
+    flex: 1;
+    font-size: 0.9rem;
+    padding: 10px 12px;
+    min-height: 44px;
+  }
+
+  .charm-stage {
+    width: 60px;
+    padding: 6px 4px;
+    font-size: 0.85rem;
+  }
+
+  .remove-charm-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+
+  .picker-body {
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+  }
+
+  .picker-categories {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px;
+    gap: 8px;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .picker-categories::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+  }
+
+  .picker-category {
+    flex: 0 0 auto;
+    width: 120px;
+    padding: 8px;
+    margin-bottom: 0;
+  }
+
+  .picker-charms {
+    flex-grow: 1;
+    overflow-y: auto;
+  }
+}
+
+/* 더 작은 모바일 화면 */
+@media (max-width: 480px) {
+  .main-title {
+    font-size: 1.4rem;
+  }
+
+  .main-container {
+    padding: 12px 12px 16px 12px;
+  }
+
+  .logo-image {
+    width: 70px;
+    height: 70px;
+  }
+
+  .settings-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+
+  .charm-row {
+    gap: 6px;
+  }
+
+  .charm-button {
+    font-size: 0.85rem;
+    padding: 8px 10px;
+  }
+
+  .charm-stage {
+    width: 55px;
+    padding: 4px 2px;
+    font-size: 0.8rem;
+  }
+
+  .remove-charm-btn {
     width: 28px;
     height: 28px;
     font-size: 0.9rem;
@@ -1244,4 +1439,57 @@ body {
     font-size: 1rem;
     padding: 14px 20px;
   }
+}
+
+/* QR 코드 모달 스타일 */
+.qr-modal-content {
+  width: 90%;
+  max-width: 360px;
+  background: var(--bg-slate-900);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.qr-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  color: var(--text-primary);
+}
+
+.qrcode-container {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  min-width: 200px;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrcode-container img {
+  display: block;
+}
+
+.qr-note {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.qr-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
 }

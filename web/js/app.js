@@ -160,6 +160,93 @@ function initMusicPlayer() {
     audio.load();
   }
   
+  // QR 코드 모달 관련 요소
+  const qrModal = document.getElementById('qr-modal');
+  const qrClose = document.getElementById('qr-close');
+  const qrContainer = document.getElementById('qrcode-container'); // ID 수정됨: qrcode -> qrcode-container (HTML과 일치)
+  // HTML에서 qrcode-container가 아니라 qrcode로 되어있을 수 있음. 확인 필요.
+  // 아까 HTML 수정할 때 <div id="qrcode" class="qrcode-container"></div> 로 했음.
+  // 따라서 ID는 qrcode임.
+  const qrCodeEl = document.getElementById('qrcode');
+  const qrLoading = document.getElementById('qr-loading');
+  
+  // QR 모달 닫기
+  function closeQrModal() {
+    qrModal.classList.add('hidden');
+    qrModal.setAttribute('aria-hidden', 'true');
+    // QR 코드 내용 지우기
+    if (qrCodeEl) qrCodeEl.innerHTML = '';
+  }
+  
+  if (qrClose) {
+    qrClose.addEventListener('click', closeQrModal);
+  }
+  
+  if (qrModal) {
+    qrModal.addEventListener('click', (e) => {
+      if (e.target === qrModal) closeQrModal();
+    });
+  }
+
+  // 다운로드 (QR 코드 모달 열기)
+  async function downloadAudio() {
+    if (!audioData) return;
+    
+    // 모달 열기
+    qrModal.classList.remove('hidden');
+    qrModal.setAttribute('aria-hidden', 'false');
+    
+    // 로딩 표시
+    qrCodeEl.classList.add('hidden');
+    qrLoading.classList.remove('hidden');
+    qrCodeEl.innerHTML = '';
+    
+    try {
+      // 1. Firebase Storage에 업로드
+      const storageRef = firebase.storage().ref();
+      // 파일명에 타임스탬프 추가하여 중복 방지
+      const uniqueFileName = `ringtones/${Date.now()}_${fileName}`;
+      const fileRef = storageRef.child(uniqueFileName);
+      
+      // Base64 데이터를 Blob으로 변환
+      const byteCharacters = atob(audioData.base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: audioData.mimeType });
+      
+      // 업로드
+      await fileRef.put(blob);
+      
+      // 2. 다운로드 URL 가져오기
+      const downloadUrl = await fileRef.getDownloadURL();
+      console.log('Download URL:', downloadUrl);
+      
+      // 3. QR 코드 생성
+      qrLoading.classList.add('hidden');
+      qrCodeEl.classList.remove('hidden');
+      
+      new QRCode(qrCodeEl, {
+        text: downloadUrl,
+        width: 200,
+        height: 200,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+      });
+      
+      // 4. 5분 후 파일 삭제 (선택 사항 - 여기서는 구현 안 함, 대신 QR 유효기간 안내만)
+      
+    } catch (error) {
+      console.error('QR code generation failed:', error);
+      qrLoading.classList.add('hidden');
+      qrCodeEl.classList.remove('hidden');
+      qrCodeEl.innerHTML = '<p style="color:red">오류가 발생했습니다.<br>다시 시도해주세요.</p>';
+    }
+  }
+  
   // 재생/일시정지 토글
   function togglePlay() {
     if (audio.paused) {
@@ -173,16 +260,6 @@ function initMusicPlayer() {
       playBtn.classList.remove('playing');
       cdImage.classList.remove('spinning');
     }
-  }
-  
-  // 다운로드
-  function downloadAudio() {
-    if (!audioData) return;
-    
-    const a = document.createElement('a');
-    a.href = `data:${audioData.mimeType};base64,${audioData.base64Data}`;
-    a.download = fileName;
-    a.click();
   }
   
   // 프로그레스 바 클릭으로 위치 이동
